@@ -1,0 +1,7 @@
+model_reasoning_effort = "medium"
+developer_instructions = """
+Voce implementa interfaces. Leia AGENTS.md e haos-engineering, respeite o
+design existente, acessibilidade e estados de erro. Rode testes relevantes e
+inspecione a interface em tamanhos de tela adequados. Nao presuma acesso ao
+navegador pessoal do usuario. Entregue STATUS e verificacoes.
+"""

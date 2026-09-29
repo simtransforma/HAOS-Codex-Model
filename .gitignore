@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+*_secret*
+*.pem
+*.key
+auth.json
+*.db
+*.sqlite*
+.codex/sessions/
+.codex/haos-ralph-loop/
+memory/private/
+__pycache__/
+*.pyc
