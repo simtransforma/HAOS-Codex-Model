@@ -9,6 +9,7 @@ aprovacao humana. Nao e uma copia de nenhuma operacao real.
 - `AGENTS.md`: contrato do orquestrador e limites de autonomia.
 - `.agents/skills/`: metodos reutilizaveis, cada um com `SKILL.md`.
 - `.codex/agents/`: papeis de revisao que podem ser registrados no Codex.
+- `playbooks/`: modelos de deploy, incidente e decisao.
 - `memory/`: modelo de registro curado, sem transcricoes nem segredos.
 - `hooks/`: contrato para hooks opcionais; nenhum hook e ativado por padrao.
 
