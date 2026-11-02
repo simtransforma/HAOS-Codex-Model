@@ -1,43 +1,71 @@
 # HAOS Codex Model
 
-Modelo publico e minimo de orquestracao para Codex. Ele mostra como combinar
-regras de projeto, skills sob demanda, agentes especialistas, verificacao e
-aprovacao humana. Nao e uma copia de nenhuma operacao real.
-
-## Estrutura
-
-- `AGENTS.md`: contrato do orquestrador e limites de autonomia.
-- `.agents/skills/`: metodos reutilizaveis, cada um com `SKILL.md`.
-- `.codex/agents/`: papeis de revisao que podem ser registrados no Codex.
-- `playbooks/`: modelos de deploy, incidente e decisao.
-- `memory/`: modelo de registro curado, sem transcricoes nem segredos.
-- `hooks/`: contrato para hooks opcionais; nenhum hook e ativado por padrao.
+Modelo publico de orquestracao para Codex: regras de projeto, skills sob demanda,
+papeis especialistas e verificacao com aprovacao humana. Conteudo generico e
+portavel, sem configuracao de operacao privada. Nao e um servico gerenciado,
+instalador automatico ou distribuicao do Superpowers upstream.
 
 ## Comecar
 
-1. Copie o conteudo para um projeto novo e personalize `AGENTS.md`.
-2. Revise cada skill e agente antes de disponibiliza-los ao Codex.
-3. Registre os agentes em sua configuracao local conforme [INSTALL.md](INSTALL.md).
-4. Execute os checks do projeto e teste delegacao e aprovacao em ambiente de
-   desenvolvimento antes de qualquer uso operacional.
+Leia [AGENTS.md](AGENTS.md) e [INSTALL.md](INSTALL.md) antes de copiar arquivos.
+O [prompt de instalacao](PROMPT_INSTALACAO.md) delimita uma instalacao local
+conservadora. Uma interface de chat ou GPT Work sem filesystem e ferramentas
+locais nao instala este modelo: pode analisar o material e preparar um plano.
 
-O modelo nao inclui chave, provider, endpoint, nome de cliente, infraestrutura,
-hook de memoria ativo ou permissao para publicar, enviar ou alterar producao.
-Integracoes devem receber identidades proprias e aprovacao explicita.
+O caminho de descoberta de skills e agentes varia conforme runtime, versao,
+camadas de configuracao e confianca do projeto. Versoes recentes do Codex tambem
+descobrem agentes em `.codex/agents/`; registro explicito continua sendo uma
+opcao conservadora. Nenhuma dessas formas dispensa diagnostico e teste real.
+Veja fontes oficiais e procedimento no [INSTALL.md](INSTALL.md).
 
-O conjunto inicial tem 30 agentes TOML e oito skills genericas. Os agentes
-precisam ser registrados na configuracao do seu Codex; apenas copiar os TOML
-para o repositorio nao os ativa.
+## Mapa
 
-## Principios
+| Local | Conteudo |
+| --- | --- |
+| [AGENTS.md](AGENTS.md) | Contrato resumido e gates |
+| [docs/MAIN_ORQUESTRACAO.md](docs/MAIN_ORQUESTRACAO.md) | Plano, delegacao, revisao e fechamento |
+| [docs/CAPABILITIES.md](docs/CAPABILITIES.md) | Entregue, conceitual e opcional, sem confundir ativacao |
+| [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) | Fronteiras das integracoes opcionais |
+| `.agents/skills/` | Metodos locais, com `SKILL.md` por skill |
+| `.codex/agents/` | Definicoes TOML de papeis, sujeitas ao schema instalado |
+| `.codex/skill-routing.json` | Catalogo e associacoes declarativas de skills e papeis |
+| `playbooks/` | Checklists reutilizaveis |
+| `memory/` | Estrutura de memoria curada, nao diario de conversas |
+| [hooks/README.md](hooks/README.md) | Contrato opcional, nao ativacao de hooks |
+| [SECURITY.md](SECURITY.md) | Segredos, consentimento e relato de incidentes |
+| [CHANGELOG.md](CHANGELOG.md) | Historico das mudancas documentadas |
 
-- Leitura e diagnostico podem ser diretos; trabalho complexo pode ser delegado
-  a especialistas com escopo e criterios de aceite.
-- Uma resposta de agente nao e evidencia suficiente de conclusao. Execute
-  testes e confira o resultado real.
-- O Rito organiza fases e gates, sem conceder autorizacao externa.
-- Skills sao carregadas por pertinencia; adicionar centenas ao contexto sem
-  curadoria reduz a qualidade de selecao.
+## Validacao local
 
-Este repositorio e um ponto de partida. Nao substitui politica de seguranca,
-backup ou governanca do ambiente em que voce o instalar.
+Na raiz deste checkout, com Python 3.11 ou superior e sem dependencias externas:
+
+```sh
+python -B scripts/validate_model.py
+python -B -m unittest discover -s tests -v
+```
+
+O validador confere estrutura, referencias locais, matriz e candidatos sensiveis;
+a suite testa esse comportamento. Isso nao comprova modelo efetivo, instalacao,
+skills executadas, delegacao, hooks ou integracoes em funcionamento. O aceite
+do runtime tem checks separados no [INSTALL.md](INSTALL.md).
+
+## Operacao
+
+Perguntas simples recebem resposta direta. Trabalho substantivo usa contexto e
+evidencias, plano proporcional, catalogo de metadados, skills selecionadas e
+especialistas disponiveis. Ondas tem no maximo tres agentes com owners
+disjuntos; revisao e independente. Loops sao finitos e defeitos nao viram sucesso
+por falta de tentativas. O Rito preserva suas 13 fases e gates.
+
+Modelos sao escolhidos por capacidade e schema real, sem IDs universais. JEV e
+opcional e fica desligado sem API autorizada. Evoluir e um fechamento conceitual
+do main, nao promessa de captura, hook Stop ou sincronizacao de memoria.
+
+Permissao local nao autoriza deploy, publicacao, envio, gasto, push ou merge.
+Um OK externo explicito permanece valido no escopo ate concluir ou revogar,
+sem renovacao por tempo; ampliacao material pede nova confirmacao.
+
+O catalogo efetivo vem dos arquivos presentes e do diagnostico do ambiente,
+nao de contagens promocionais. Conectores, autenticacao, bibliotecas externas e
+testes operacionais nao sao implicados pela documentacao. Este modelo nao
+substitui politica de seguranca, backup ou governanca do usuario.

@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "template": true,
+  "active": false,
+  "task_id": null,
+  "revision": null,
+  "status": "not_started",
+  "current_phase": null,
+  "phases": {
+    "intake": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "research": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "strategy": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "planning": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "copy": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "design": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "funnel": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "media": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "tracking": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "qa": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "activation": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "monitoring": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    },
+    "debrief": {
+      "status": "not_started",
+      "evidence": [],
+      "gate": {
+        "status": "pending",
+        "approval": null,
+        "reason": null
+      }
+    }
+  }
+}

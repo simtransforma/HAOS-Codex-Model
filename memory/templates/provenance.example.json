@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "template": true,
+  "active": false,
+  "record": {
+    "record_id": null,
+    "scope": "example-only",
+    "kind": "procedimento",
+    "summary": "Exemplo ficticio de envelope; nao representa aprendizado ou escrita real.",
+    "origin": "synthetic-template",
+    "locator": "example-only",
+    "observed_at": null,
+    "confidence": "pending",
+    "confidence_reason": "Exemplo sem observacao ou evidencia real.",
+    "supersedes": null,
+    "task_id": null,
+    "revision": null,
+    "identity_reason": "Template inativo sem identidade operacional.",
+    "dedupe_key": null,
+    "content_hash": null
+  },
+  "destinations": []
+}

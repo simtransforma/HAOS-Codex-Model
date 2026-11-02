@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Estado inativo do Rito de treze fases - somente template",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "template",
+    "active",
+    "task_id",
+    "revision",
+    "status",
+    "current_phase",
+    "phases"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "template": {
+      "const": true
+    },
+    "active": {
+      "const": false
+    },
+    "task_id": {
+      "type": "null"
+    },
+    "revision": {
+      "type": "null"
+    },
+    "status": {
+      "const": "not_started"
+    },
+    "current_phase": {
+      "type": "null"
+    },
+    "phases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intake",
+        "research",
+        "strategy",
+        "planning",
+        "copy",
+        "design",
+        "funnel",
+        "media",
+        "tracking",
+        "qa",
+        "activation",
+        "monitoring",
+        "debrief"
+      ],
+      "properties": {
+        "intake": {
+          "$ref": "#/$defs/phase"
+        },
+        "research": {
+          "$ref": "#/$defs/phase"
+        },
+        "strategy": {
+          "$ref": "#/$defs/phase"
+        },
+        "planning": {
+          "$ref": "#/$defs/phase"
+        },
+        "copy": {
+          "$ref": "#/$defs/phase"
+        },
+        "design": {
+          "$ref": "#/$defs/phase"
+        },
+        "funnel": {
+          "$ref": "#/$defs/phase"
+        },
+        "media": {
+          "$ref": "#/$defs/phase"
+        },
+        "tracking": {
+          "$ref": "#/$defs/phase"
+        },
+        "qa": {
+          "$ref": "#/$defs/phase"
+        },
+        "activation": {
+          "$ref": "#/$defs/phase"
+        },
+        "monitoring": {
+          "$ref": "#/$defs/phase"
+        },
+        "debrief": {
+          "$ref": "#/$defs/phase"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "evidence",
+        "gate"
+      ],
+      "properties": {
+        "status": {
+          "const": "not_started"
+        },
+        "evidence": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status",
+            "approval",
+            "reason"
+          ],
+          "properties": {
+            "status": {
+              "const": "pending"
+            },
+            "approval": {
+              "type": "null"
+            },
+            "reason": {
+              "type": "null"
+            }
+          }
+        }
+      }
+    }
+  }
+}

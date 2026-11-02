@@ -1,0 +1,1091 @@
+{
+  "schema_version": 1,
+  "description": "Mapa declarativo de capacidades locais. Arquivos nao sao runtime: este JSON nao executa skills, nao registra agentes nem instala comandos.",
+  "recommendation_only": true,
+  "path_base": "repository-root",
+  "defaults": {
+    "effort": "high",
+    "max_parallel_agents": 3,
+    "max_correction_cycles": 3
+  },
+  "skills": {
+    "haos-engineering": {
+      "path": ".agents/skills/haos-engineering/SKILL.md",
+      "description": "Mudancas de codigo, contratos e testes proporcionais."
+    },
+    "haos-evidence": {
+      "path": ".agents/skills/haos-evidence/SKILL.md",
+      "description": "Alegacoes de conclusao, estado atual e entrega verificavel."
+    },
+    "haos-execution-waves": {
+      "path": ".agents/skills/haos-execution-waves/SKILL.md",
+      "description": "Plano com dependencias e ownership disjunto."
+    },
+    "haos-memory": {
+      "path": ".agents/skills/haos-memory/SKILL.md",
+      "description": "Consulta ou curadoria de conhecimento autorizado."
+    },
+    "haos-rito-v2": {
+      "path": ".agents/skills/haos-rito-v2/SKILL.md",
+      "description": "Projetos amplos organizados por 13 fases e gates."
+    },
+    "haos-router": {
+      "path": ".agents/skills/haos-router/SKILL.md",
+      "description": "Triagem e selecao de especialistas e metodos."
+    },
+    "haos-security-review": {
+      "path": ".agents/skills/haos-security-review/SKILL.md",
+      "description": "Revisao tecnica autorizada de seguranca."
+    },
+    "haos-worktree": {
+      "path": ".agents/skills/haos-worktree/SKILL.md",
+      "description": "Isolamento Git opcional quando justificado."
+    },
+    "haos-evoluir": {
+      "path": ".agents/skills/haos-evoluir/SKILL.md",
+      "description": "Fechamento pelo main e aprendizado com valor comprovado."
+    },
+    "haos-memory-provenance": {
+      "path": ".agents/skills/haos-memory-provenance/SKILL.md",
+      "description": "Persistencia com origem, dedupe e readback."
+    },
+    "haos-model-router": {
+      "path": ".agents/skills/haos-model-router/SKILL.md",
+      "description": "Recomendacao consultiva de capacidade e effort."
+    },
+    "haos-superpowers": {
+      "path": ".agents/skills/haos-superpowers/SKILL.md",
+      "description": "Adaptacao de metodos auxiliares opcionais ao contrato local."
+    },
+    "haos-quality-gates": {
+      "path": ".agents/skills/haos-quality-gates/SKILL.md",
+      "description": "Criterios de qualidade e verificacoes por dominio."
+    },
+    "haos-task-loop": {
+      "path": ".agents/skills/haos-task-loop/SKILL.md",
+      "description": "Execucao delimitada por aceite e limite finito."
+    },
+    "haos-deep-research": {
+      "path": ".agents/skills/haos-deep-research/SKILL.md",
+      "description": "Investigacao com fontes, contradicoes e limites."
+    },
+    "haos-claim-verification": {
+      "path": ".agents/skills/haos-claim-verification/SKILL.md",
+      "description": "Verificacao individual de alegacoes factuais."
+    },
+    "haos-source-quality-auditor": {
+      "path": ".agents/skills/haos-source-quality-auditor/SKILL.md",
+      "description": "Avaliacao de autoria, atualidade e independencia das fontes."
+    },
+    "haos-session-handoff": {
+      "path": ".agents/skills/haos-session-handoff/SKILL.md",
+      "description": "Transferencia saneada de estado e proximos passos."
+    },
+    "haos-dump-import": {
+      "path": ".agents/skills/haos-dump-import/SKILL.md",
+      "description": "Leitura segura de historico nao confiavel."
+    },
+    "haos-design": {
+      "path": ".agents/skills/haos-design/SKILL.md",
+      "description": "Interfaces orientadas ao publico e verificacao visual."
+    },
+    "haos-copy": {
+      "path": ".agents/skills/haos-copy/SKILL.md",
+      "description": "Mensagens genericas sustentadas por oferta e evidencia."
+    },
+    "haos-multi-agent-review": {
+      "path": ".agents/skills/haos-multi-agent-review/SKILL.md",
+      "description": "Revisao independente read-only e achados rastreaveis."
+    },
+    "haos-structural-refactor": {
+      "path": ".agents/skills/haos-structural-refactor/SKILL.md",
+      "description": "AUDIT estrutural read-only e APPLY sob gate."
+    },
+    "haos-mega-brain": {
+      "path": ".agents/skills/haos-mega-brain/SKILL.md",
+      "description": "Sintese de conhecimento autorizado e contradicoes."
+    },
+    "haos-menu": {
+      "path": ".agents/skills/haos-menu/SKILL.md",
+      "description": "Menu por nomes reais de skills e capacidades locais."
+    },
+    "haos-conselho": {
+      "path": ".agents/skills/haos-conselho/SKILL.md",
+      "description": "Deliberacao com precedentes, juridico e financeiro pertinente."
+    },
+    "haos-departamentos": {
+      "path": ".agents/skills/haos-departamentos/SKILL.md",
+      "description": "Selecao funcional de papeis por dominio."
+    },
+    "haos-squad": {
+      "path": ".agents/skills/haos-squad/SKILL.md",
+      "description": "Coordenacao de especialistas com ownership e revisao."
+    },
+    "haos-session-dump": {
+      "path": ".agents/skills/haos-session-dump/SKILL.md",
+      "description": "Exportacao saneada de historico explicitamente autorizado."
+    }
+  },
+  "agents": {
+    "main": {
+      "path": ".codex/agents/main.toml",
+      "description": "Coordenar, delegar, integrar, verificar e fechar uma unica tarefa.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-router",
+        "haos-menu",
+        "haos-conselho",
+        "haos-departamentos",
+        "haos-squad",
+        "haos-model-router",
+        "haos-execution-waves",
+        "haos-rito-v2",
+        "haos-evoluir",
+        "haos-memory-provenance"
+      ],
+      "function": "Coordenar, delegar, integrar, verificar e fechar uma unica tarefa."
+    },
+    "concierge": {
+      "path": ".codex/agents/concierge.toml",
+      "description": "Classificar pedidos e responder diretamente o autocontido.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-router",
+        "haos-menu",
+        "haos-model-router"
+      ],
+      "function": "Classificar pedidos e responder diretamente o autocontido."
+    },
+    "oraculo": {
+      "path": ".codex/agents/oraculo.toml",
+      "description": "Examinar precedentes, contradicoes, alternativas e pontos cegos.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-conselho",
+        "haos-mega-brain",
+        "haos-memory",
+        "haos-deep-research",
+        "haos-claim-verification"
+      ],
+      "function": "Examinar precedentes, contradicoes, alternativas e pontos cegos."
+    },
+    "brabo": {
+      "path": ".codex/agents/brabo.toml",
+      "description": "Analisar risco juridico com jurisdicao e documentos primarios.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-conselho",
+        "haos-deep-research",
+        "haos-claim-verification",
+        "haos-source-quality-auditor"
+      ],
+      "function": "Analisar risco juridico com jurisdicao e documentos primarios."
+    },
+    "relacionamento-editorial": {
+      "path": ".codex/agents/relacionamento-editorial.toml",
+      "description": "Triar materiais autorizados para uso editorial e rastrear direitos e timestamps.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-copy",
+        "haos-session-handoff",
+        "haos-source-quality-auditor"
+      ],
+      "function": "Triar materiais autorizados para uso editorial e rastrear direitos e timestamps."
+    },
+    "pesquisador": {
+      "path": ".codex/agents/pesquisador.toml",
+      "description": "Investigar perguntas, qualificar fontes e verificar alegacoes.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-deep-research",
+        "haos-claim-verification",
+        "haos-source-quality-auditor",
+        "haos-mega-brain"
+      ],
+      "function": "Investigar perguntas, qualificar fontes e verificar alegacoes."
+    },
+    "estrategista-chefe": {
+      "path": ".codex/agents/estrategista-chefe.toml",
+      "description": "Integrar alternativas estrategicas e pareceres do conselho.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-conselho",
+        "haos-rito-v2",
+        "haos-mega-brain",
+        "haos-claim-verification"
+      ],
+      "function": "Integrar alternativas estrategicas e pareceres do conselho."
+    },
+    "cfo": {
+      "path": ".codex/agents/cfo.toml",
+      "description": "Modelar cenarios financeiros, unidades, premissas e sensibilidade.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-conselho",
+        "haos-claim-verification",
+        "haos-source-quality-auditor",
+        "haos-quality-gates"
+      ],
+      "function": "Modelar cenarios financeiros, unidades, premissas e sensibilidade."
+    },
+    "cmo": {
+      "path": ".codex/agents/cmo.toml",
+      "description": "Planejar posicionamento e medir hipoteses de crescimento.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-conselho",
+        "haos-copy",
+        "haos-deep-research",
+        "haos-claim-verification"
+      ],
+      "function": "Planejar posicionamento e medir hipoteses de crescimento."
+    },
+    "diretor-criativo": {
+      "path": ".codex/agents/diretor-criativo.toml",
+      "description": "Definir direcao criativa generica e coerencia entre texto e imagem.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-design",
+        "haos-copy",
+        "haos-quality-gates"
+      ],
+      "function": "Definir direcao criativa generica e coerencia entre texto e imagem."
+    },
+    "copy-specialist": {
+      "path": ".codex/agents/copy-specialist.toml",
+      "description": "Redigir mensagens genericas por publico, oferta e provas.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-copy",
+        "haos-claim-verification",
+        "haos-quality-gates"
+      ],
+      "function": "Redigir mensagens genericas por publico, oferta e provas."
+    },
+    "content-strategist": {
+      "path": ".codex/agents/content-strategist.toml",
+      "description": "Organizar pautas e formatos sustentados por pesquisa e objetivos.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-copy",
+        "haos-deep-research",
+        "haos-source-quality-auditor"
+      ],
+      "function": "Organizar pautas e formatos sustentados por pesquisa e objetivos."
+    },
+    "designer": {
+      "path": ".codex/agents/designer.toml",
+      "description": "Projetar fluxos, hierarquia, acessibilidade e estados de interface.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-design",
+        "haos-quality-gates",
+        "haos-multi-agent-review"
+      ],
+      "function": "Projetar fluxos, hierarquia, acessibilidade e estados de interface."
+    },
+    "videomaker": {
+      "path": ".codex/agents/videomaker.toml",
+      "description": "Planejar roteiro audiovisual e conferir direitos e especificacoes.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-copy",
+        "haos-design",
+        "haos-quality-gates"
+      ],
+      "function": "Planejar roteiro audiovisual e conferir direitos e especificacoes."
+    },
+    "sm-social": {
+      "path": ".codex/agents/sm-social.toml",
+      "description": "Preparar conteudo social e plano editorial sem publicar automaticamente.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-copy",
+        "haos-claim-verification",
+        "haos-quality-gates"
+      ],
+      "function": "Preparar conteudo social e plano editorial sem publicar automaticamente."
+    },
+    "traffic-master": {
+      "path": ".codex/agents/traffic-master.toml",
+      "description": "Planejar midia com hipoteses, limites e metricas verificaveis.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-claim-verification",
+        "haos-quality-gates",
+        "haos-execution-waves"
+      ],
+      "function": "Planejar midia com hipoteses, limites e metricas verificaveis."
+    },
+    "media-buyer": {
+      "path": ".codex/agents/media-buyer.toml",
+      "description": "Preparar configuracao de midia e conferir escopo sem ativacao implicita.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-quality-gates",
+        "haos-copy"
+      ],
+      "function": "Preparar configuracao de midia e conferir escopo sem ativacao implicita."
+    },
+    "tracking-engineer": {
+      "path": ".codex/agents/tracking-engineer.toml",
+      "description": "Especificar eventos, denominadores, identidade e deduplicacao.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-engineering",
+        "haos-quality-gates",
+        "haos-claim-verification"
+      ],
+      "function": "Especificar eventos, denominadores, identidade e deduplicacao."
+    },
+    "data-analyst": {
+      "path": ".codex/agents/data-analyst.toml",
+      "description": "Analisar dados com janela, fonte, denominador e lacunas.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-claim-verification",
+        "haos-source-quality-auditor",
+        "haos-quality-gates"
+      ],
+      "function": "Analisar dados com janela, fonte, denominador e lacunas."
+    },
+    "bi-engineer": {
+      "path": ".codex/agents/bi-engineer.toml",
+      "description": "Projetar modelos de dados, transformacoes e reconciliacao.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-engineering",
+        "haos-quality-gates",
+        "haos-structural-refactor"
+      ],
+      "function": "Projetar modelos de dados, transformacoes e reconciliacao."
+    },
+    "auditor-confianca": {
+      "path": ".codex/agents/auditor-confianca.toml",
+      "description": "Auditar alegacoes, fontes e grau de suporte das conclusoes.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-claim-verification",
+        "haos-source-quality-auditor",
+        "haos-multi-agent-review"
+      ],
+      "function": "Auditar alegacoes, fontes e grau de suporte das conclusoes."
+    },
+    "funnel-architect": {
+      "path": ".codex/agents/funnel-architect.toml",
+      "description": "Modelar jornada, estados e contratos entre pontos do funil.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-execution-waves",
+        "haos-quality-gates",
+        "haos-copy"
+      ],
+      "function": "Modelar jornada, estados e contratos entre pontos do funil."
+    },
+    "automation-engineer": {
+      "path": ".codex/agents/automation-engineer.toml",
+      "description": "Implementar automacao idempotente com tratamento de falha.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-engineering",
+        "haos-quality-gates",
+        "haos-task-loop",
+        "haos-multi-agent-review"
+      ],
+      "function": "Implementar automacao idempotente com tratamento de falha."
+    },
+    "crm-specialist": {
+      "path": ".codex/agents/crm-specialist.toml",
+      "description": "Modelar estagios, identidade e reconciliacao de CRM generico.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-quality-gates",
+        "haos-memory-provenance"
+      ],
+      "function": "Modelar estagios, identidade e reconciliacao de CRM generico."
+    },
+    "email-marketer": {
+      "path": ".codex/agents/email-marketer.toml",
+      "description": "Preparar mensagens e sequencias com consentimento e supressao.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-copy",
+        "haos-claim-verification",
+        "haos-quality-gates"
+      ],
+      "function": "Preparar mensagens e sequencias com consentimento e supressao."
+    },
+    "product-manager": {
+      "path": ".codex/agents/product-manager.toml",
+      "description": "Definir problemas, prioridades, aceite e dependencias de produto.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-rito-v2",
+        "haos-execution-waves",
+        "haos-quality-gates"
+      ],
+      "function": "Definir problemas, prioridades, aceite e dependencias de produto."
+    },
+    "ux-researcher": {
+      "path": ".codex/agents/ux-researcher.toml",
+      "description": "Investigar necessidades e validar fluxos sem fabricar entrevistas.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-deep-research",
+        "haos-design",
+        "haos-source-quality-auditor"
+      ],
+      "function": "Investigar necessidades e validar fluxos sem fabricar entrevistas."
+    },
+    "dev-frontend": {
+      "path": ".codex/agents/dev-frontend.toml",
+      "description": "Implementar interfaces e validar comportamento visual e acessibilidade.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-engineering",
+        "haos-design",
+        "haos-quality-gates",
+        "haos-structural-refactor",
+        "haos-multi-agent-review"
+      ],
+      "function": "Implementar interfaces e validar comportamento visual e acessibilidade."
+    },
+    "dev-backend": {
+      "path": ".codex/agents/dev-backend.toml",
+      "description": "Implementar contratos, validacao de entrada e testes de falha.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-engineering",
+        "haos-quality-gates",
+        "haos-structural-refactor",
+        "haos-multi-agent-review"
+      ],
+      "function": "Implementar contratos, validacao de entrada e testes de falha."
+    },
+    "qa-reviewer": {
+      "path": ".codex/agents/qa-reviewer.toml",
+      "description": "Revisar independentemente o pacote real e executar verificacoes.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-quality-gates",
+        "haos-multi-agent-review"
+      ],
+      "function": "Revisar independentemente o pacote real e executar verificacoes."
+    },
+    "project-manager": {
+      "path": ".codex/agents/project-manager.toml",
+      "description": "Coordenar dependencias, ownership, limites e transferencia.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-execution-waves",
+        "haos-task-loop",
+        "haos-session-handoff",
+        "haos-squad"
+      ],
+      "function": "Coordenar dependencias, ownership, limites e transferencia."
+    },
+    "compliance-officer": {
+      "path": ".codex/agents/compliance-officer.toml",
+      "description": "Conferir escopo, privacidade, direitos e gates aplicaveis.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-quality-gates",
+        "haos-claim-verification",
+        "haos-source-quality-auditor"
+      ],
+      "function": "Conferir escopo, privacidade, direitos e gates aplicaveis."
+    },
+    "devops": {
+      "path": ".codex/agents/devops.toml",
+      "description": "Planejar operacao reversivel e validar ambiente dentro do escopo.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-engineering",
+        "haos-security-review",
+        "haos-worktree",
+        "haos-quality-gates"
+      ],
+      "function": "Planejar operacao reversivel e validar ambiente dentro do escopo."
+    },
+    "security-reviewer": {
+      "path": ".codex/agents/security-reviewer.toml",
+      "description": "Revisar seguranca tecnica e limites de permissao em modo read-only.",
+      "skills": [
+        "haos-evidence",
+        "haos-superpowers",
+        "haos-security-review",
+        "haos-quality-gates",
+        "haos-multi-agent-review"
+      ],
+      "function": "Revisar seguranca tecnica e limites de permissao em modo read-only."
+    }
+  },
+  "routes": [
+    {
+      "id": "direto",
+      "description": "Pergunta autocontida; nenhuma delegacao obrigatoria.",
+      "triggers": [
+        "pergunta simples",
+        "conceito autocontido"
+      ],
+      "agents": [
+        "concierge"
+      ],
+      "skills": [
+        "haos-router",
+        "haos-evidence"
+      ],
+      "mode": "DIRECT",
+      "external_approval_required": false
+    },
+    {
+      "id": "menu",
+      "description": "Listar nomes realmente presentes, sem prometer plugin ou slash.",
+      "triggers": [
+        "menu",
+        "skills disponiveis",
+        "capacidades"
+      ],
+      "agents": [
+        "main",
+        "concierge"
+      ],
+      "skills": [
+        "haos-menu",
+        "haos-router"
+      ],
+      "mode": "READ_ONLY",
+      "external_approval_required": false
+    },
+    {
+      "id": "planejar",
+      "description": "Organizar projeto amplo, fase e limites.",
+      "triggers": [
+        "projeto amplo",
+        "rito",
+        "planejamento"
+      ],
+      "agents": [
+        "main",
+        "project-manager",
+        "product-manager"
+      ],
+      "skills": [
+        "haos-rito-v2",
+        "haos-execution-waves",
+        "haos-router"
+      ],
+      "mode": "DELEGATE",
+      "external_approval_required": false
+    },
+    {
+      "id": "conselho",
+      "description": "Nucleo decisor: estrategista-chefe, diretor-criativo e cmo; insumos de oraculo e brabo; cfo condicional. Consultas em ondas de ate tres.",
+      "triggers": [
+        "conselho",
+        "decisao estrategica",
+        "risco juridico",
+        "decisao financeira"
+      ],
+      "agents": [
+        "estrategista-chefe",
+        "diretor-criativo",
+        "cmo",
+        "oraculo",
+        "brabo",
+        "cfo"
+      ],
+      "skills": [
+        "haos-conselho",
+        "haos-mega-brain",
+        "haos-claim-verification"
+      ],
+      "mode": "DELEGATE",
+      "external_approval_required": false
+    },
+    {
+      "id": "squad",
+      "description": "Dividir por dependencias, donos e capacidade real da ferramenta.",
+      "triggers": [
+        "squad",
+        "subtarefas",
+        "departamentos"
+      ],
+      "agents": [
+        "main",
+        "project-manager"
+      ],
+      "skills": [
+        "haos-squad",
+        "haos-departamentos",
+        "haos-execution-waves",
+        "haos-model-router"
+      ],
+      "mode": "DELEGATE",
+      "external_approval_required": false
+    },
+    {
+      "id": "pesquisa",
+      "description": "Investigar com livro de fontes e alegacoes rastreaveis.",
+      "triggers": [
+        "pesquisa",
+        "fontes",
+        "verificar afirmacao"
+      ],
+      "agents": [
+        "pesquisador",
+        "auditor-confianca"
+      ],
+      "skills": [
+        "haos-deep-research",
+        "haos-claim-verification",
+        "haos-source-quality-auditor"
+      ],
+      "mode": "READ_ONLY",
+      "external_approval_required": false
+    },
+    {
+      "id": "conhecimento",
+      "description": "Consultar ou sintetizar conhecimento sem presumir integracao.",
+      "triggers": [
+        "mega brain",
+        "conhecimento",
+        "memoria"
+      ],
+      "agents": [
+        "oraculo",
+        "pesquisador"
+      ],
+      "skills": [
+        "haos-mega-brain",
+        "haos-memory",
+        "haos-memory-provenance"
+      ],
+      "mode": "READ_ONLY",
+      "external_approval_required": false
+    },
+    {
+      "id": "conteudo",
+      "description": "Preparar texto e audiovisual genericos; publicar e gate separado.",
+      "triggers": [
+        "copy",
+        "conteudo",
+        "roteiro",
+        "editorial"
+      ],
+      "agents": [
+        "copy-specialist",
+        "content-strategist",
+        "diretor-criativo",
+        "videomaker",
+        "sm-social",
+        "relacionamento-editorial"
+      ],
+      "skills": [
+        "haos-copy",
+        "haos-claim-verification",
+        "haos-quality-gates"
+      ],
+      "mode": "DELEGATE",
+      "external_approval_required": false
+    },
+    {
+      "id": "design",
+      "description": "Projetar e conferir fluxos visuais e acessibilidade.",
+      "triggers": [
+        "interface",
+        "design",
+        "experiencia"
+      ],
+      "agents": [
+        "designer",
+        "ux-researcher",
+        "dev-frontend"
+      ],
+      "skills": [
+        "haos-design",
+        "haos-engineering",
+        "haos-quality-gates"
+      ],
+      "mode": "DELEGATE",
+      "external_approval_required": false
+    },
+    {
+      "id": "engenharia",
+      "description": "Implementar contratos e testes proporcionais.",
+      "triggers": [
+        "codigo",
+        "implementacao",
+        "bug",
+        "automacao"
+      ],
+      "agents": [
+        "dev-backend",
+        "dev-frontend",
+        "automation-engineer"
+      ],
+      "skills": [
+        "haos-engineering",
+        "haos-quality-gates",
+        "haos-task-loop",
+        "haos-multi-agent-review"
+      ],
+      "mode": "DELEGATE",
+      "external_approval_required": false
+    },
+    {
+      "id": "estrutural-audit",
+      "description": "Diagnostico estrutural estritamente read-only por padrao.",
+      "triggers": [
+        "arquivo grande",
+        "acoplamento",
+        "auditoria estrutural"
+      ],
+      "agents": [
+        "dev-backend",
+        "dev-frontend"
+      ],
+      "skills": [
+        "haos-structural-refactor",
+        "haos-quality-gates",
+        "haos-multi-agent-review"
+      ],
+      "mode": "AUDIT",
+      "external_approval_required": false
+    },
+    {
+      "id": "estrutural-apply",
+      "description": "Aplicar apenas com pedido claro e gate de baseline/plano para mudanca ampla.",
+      "triggers": [
+        "executar refatoracao",
+        "aplicar plano estrutural"
+      ],
+      "agents": [
+        "dev-backend",
+        "dev-frontend"
+      ],
+      "skills": [
+        "haos-structural-refactor",
+        "haos-execution-waves",
+        "haos-quality-gates",
+        "haos-multi-agent-review"
+      ],
+      "mode": "GATED",
+      "external_approval_required": false
+    },
+    {
+      "id": "dados",
+      "description": "Conferir fonte, unidades, janela e contratos.",
+      "triggers": [
+        "dados",
+        "metricas",
+        "BI",
+        "tracking"
+      ],
+      "agents": [
+        "data-analyst",
+        "bi-engineer",
+        "tracking-engineer"
+      ],
+      "skills": [
+        "haos-claim-verification",
+        "haos-quality-gates",
+        "haos-engineering"
+      ],
+      "mode": "DELEGATE",
+      "external_approval_required": false
+    },
+    {
+      "id": "funil",
+      "description": "Preparar jornada e reconciliacao sem envio ou ativacao.",
+      "triggers": [
+        "funil",
+        "CRM",
+        "sequencia"
+      ],
+      "agents": [
+        "funnel-architect",
+        "crm-specialist",
+        "email-marketer"
+      ],
+      "skills": [
+        "haos-copy",
+        "haos-evidence",
+        "haos-quality-gates"
+      ],
+      "mode": "DELEGATE",
+      "external_approval_required": false
+    },
+    {
+      "id": "midia",
+      "description": "Planejar hipoteses e limites financeiros, sem campanha ativa implicita.",
+      "triggers": [
+        "midia",
+        "trafego",
+        "campanha"
+      ],
+      "agents": [
+        "traffic-master",
+        "media-buyer",
+        "cmo",
+        "cfo"
+      ],
+      "skills": [
+        "haos-quality-gates",
+        "haos-claim-verification",
+        "haos-copy"
+      ],
+      "mode": "DELEGATE",
+      "external_approval_required": false
+    },
+    {
+      "id": "qualidade",
+      "description": "Revisao independente de autor e pacote completo.",
+      "triggers": [
+        "QA",
+        "revisao",
+        "compliance"
+      ],
+      "agents": [
+        "qa-reviewer",
+        "compliance-officer",
+        "auditor-confianca"
+      ],
+      "skills": [
+        "haos-multi-agent-review",
+        "haos-quality-gates",
+        "haos-evidence"
+      ],
+      "mode": "READ_ONLY",
+      "external_approval_required": false
+    },
+    {
+      "id": "seguranca",
+      "description": "Seguranca tecnica nao se confunde com analise juridica.",
+      "triggers": [
+        "seguranca",
+        "permissoes",
+        "incidente"
+      ],
+      "agents": [
+        "security-reviewer",
+        "devops"
+      ],
+      "skills": [
+        "haos-security-review",
+        "haos-quality-gates"
+      ],
+      "mode": "READ_ONLY",
+      "external_approval_required": false
+    },
+    {
+      "id": "isolamento",
+      "description": "Avaliar isolamento opcional sem criar ou remover automaticamente.",
+      "triggers": [
+        "worktree",
+        "isolamento Git"
+      ],
+      "agents": [
+        "devops"
+      ],
+      "skills": [
+        "haos-worktree",
+        "haos-evidence"
+      ],
+      "mode": "READ_ONLY",
+      "external_approval_required": false
+    },
+    {
+      "id": "handoff",
+      "description": "Preparar transferencia e dump apenas no escopo autorizado.",
+      "triggers": [
+        "handoff",
+        "dump",
+        "transferir sessao",
+        "importar historico"
+      ],
+      "agents": [
+        "main",
+        "project-manager"
+      ],
+      "skills": [
+        "haos-session-handoff",
+        "haos-session-dump",
+        "haos-dump-import",
+        "haos-memory-provenance"
+      ],
+      "mode": "GATED",
+      "external_approval_required": false
+    },
+    {
+      "id": "fechar",
+      "description": "Main fecha uma vez por tarefa/revisao com evidencias.",
+      "triggers": [
+        "concluir tarefa",
+        "evoluir",
+        "capitalizar"
+      ],
+      "agents": [
+        "main"
+      ],
+      "skills": [
+        "haos-evoluir",
+        "haos-memory-provenance",
+        "haos-evidence"
+      ],
+      "mode": "GATED",
+      "external_approval_required": false
+    },
+    {
+      "id": "externo",
+      "description": "Enviar, publicar, gastar, push, merge, deploy ou excluir exige autorizacao humana para acao/destino/risco.",
+      "triggers": [
+        "publicar",
+        "enviar",
+        "deploy",
+        "push",
+        "merge",
+        "gasto",
+        "exclusao destrutiva"
+      ],
+      "agents": [
+        "main",
+        "devops"
+      ],
+      "skills": [
+        "haos-evidence",
+        "haos-quality-gates"
+      ],
+      "mode": "GATED",
+      "external_approval_required": true
+    }
+  ],
+  "council": {
+    "agents": [
+      "estrategista-chefe",
+      "diretor-criativo",
+      "cmo",
+      "oraculo",
+      "brabo"
+    ],
+    "financial_agent": "cfo",
+    "financial_when": "CFO condicional em gasto, preco, margem, investimento, fluxo de caixa ou compromisso financeiro. Nucleo decisor: estrategista-chefe, diretor-criativo, cmo; assessores: oraculo e brabo. Primeiro insumos (oraculo/brabo/CFO pertinente), depois deliberacao do nucleo; nunca mais de tres agentes por onda."
+  },
+  "entrypoints": {
+    "haos-menu": {
+      "skill": "haos-menu",
+      "description": "Menu por nomes reais de skills e capacidades locais. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-conselho": {
+      "skill": "haos-conselho",
+      "description": "Deliberacao com precedentes, juridico e financeiro pertinente. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-departamentos": {
+      "skill": "haos-departamentos",
+      "description": "Selecao funcional de papeis por dominio. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-squad": {
+      "skill": "haos-squad",
+      "description": "Coordenacao de especialistas com ownership e revisao. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-router": {
+      "skill": "haos-router",
+      "description": "Triagem e selecao de especialistas e metodos. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-rito-v2": {
+      "skill": "haos-rito-v2",
+      "description": "Projetos amplos organizados por 13 fases e gates. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-deep-research": {
+      "skill": "haos-deep-research",
+      "description": "Investigacao com fontes, contradicoes e limites. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-session-dump": {
+      "skill": "haos-session-dump",
+      "description": "Exportacao saneada de historico explicitamente autorizado. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-session-handoff": {
+      "skill": "haos-session-handoff",
+      "description": "Transferencia saneada de estado e proximos passos. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-dump-import": {
+      "skill": "haos-dump-import",
+      "description": "Leitura segura de historico nao confiavel. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-evoluir": {
+      "skill": "haos-evoluir",
+      "description": "Fechamento pelo main e aprendizado com valor comprovado. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    },
+    "haos-mega-brain": {
+      "skill": "haos-mega-brain",
+      "description": "Sintese de conhecimento autorizado e contradicoes. Acionamento pelo nome da skill se suportado pelo ambiente; arquivos nao sao runtime."
+    }
+  },
+  "capabilities": {
+    "included": [
+      "Menu por skill real",
+      "Conselho com oraculo e juridico",
+      "CFO em decisao financeira",
+      "Departamentos e squad por disponibilidade real",
+      "Rito de 13 fases",
+      "Fechamento pelo main",
+      "Templates de estado inativos"
+    ],
+    "adapted": [
+      "Governanca por sintese original",
+      "Pesquisa e verificacao de fontes e alegacoes",
+      "Design e copy genericos",
+      "AUDIT estrutural e APPLY sob gate",
+      "Proveniencia com dedupe e readback",
+      "Handoff e importacao de historico nao confiavel",
+      "Roteamento consultivo sem IDs fixos"
+    ],
+    "optional_dependencies": [
+      "Metodos Superpowers instalados e licenciados separadamente",
+      "Documentacao atual e mapa local de codigo conforme ferramentas configuradas",
+      "Conectores de memoria habilitados explicitamente",
+      "Toqi e JEV: nao incluidos, sem endpoint nem credencial embarcados"
+    ],
+    "excluded": [
+      "Voz proprietaria e personas privadas",
+      "APIs e configuracoes de negocio",
+      "Dados pessoais, clientes e memoria operacional real",
+      "Segredos, caminhos e servidores privados",
+      "Hooks ativos e plugin de slash commands",
+      "Conteudo de terceiros sem licenca comprovada"
+    ]
+  }
+}
