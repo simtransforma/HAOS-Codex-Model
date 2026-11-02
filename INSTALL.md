@@ -6,11 +6,12 @@ hooks, credenciais, memorias ou politicas existentes. O
 
 ## 1. Identificar o ambiente
 
-Confirme runtime, versao instalada, raiz do projeto, filesystem, shell e
-ferramentas realmente disponiveis. "GPT Work" ou um chat no navegador nao
-demonstram acesso local. Sem filesystem local autorizado, nao tente instalar:
-entregue diagnostico e instrucoes, com `BLOQUEADO` para a instalacao dependente.
-Nao instale um produto chamado GPT Work nem invente CLI, API ou acesso local.
+Detecte runtime, versao, terminal, workspace local/cloud, arquivos, persistencia,
+projetos e conectores GitHub antes de agir. WORK nao significa Word nem prova
+Windows local. Com workspace cloud e terminal, clone o repositorio aprovado em
+destino novo, leia AGENTS.md e skills pertinentes. Sem filesystem, informe o
+limite de instalacao e use APIs/conectores realmente disponiveis para carregar
+metadados e conteudo sob demanda. Nao invente CLI, acesso global ou persistencia.
 
 Capture branch, diff staged/unstaged e arquivos novos antes de agir. Registre
 um baseline e selecione somente arquivos necessarios. Preserve trabalho
@@ -70,7 +71,9 @@ python -B scripts/validate_model.py
 python -B -m unittest discover -s tests -v
 ```
 
-Esses comandos sao offline e usam a biblioteca padrao. Validam o pacote e o
+Esses comandos sao offline e requerem PyYAML 6.x para YAML seguro, alem de
+Python 3.11+. Consulte scripts/model-requirements.txt; nao instale dependencias
+em silencio. Validam o pacote e o
 validador, nao demonstram agente, modelo efetivo ou integracao executada.
 Uma instalacao seletiva ainda exige os checks do destino abaixo; nao copie
 arquivos extras nem altere config apenas para simular um aceite completo.

@@ -1,0 +1,304 @@
+#!/usr/bin/env python3
+"""
+split_lotes.py - Separa TODOS os contatos de uma tag do Clint em LOTES de tamanho
+fixo (ex: 5000), aplicando uma tag nova por lote: <prefixo>_Lote1, <prefixo>_Lote2, ...
+
+Skill clint-split-lotes (PRIVADA, operacao interna do grupo). Complementa:
+  - clint-api               -> usa o ClintClient dela (auth + paginacao robusta).
+  - clint-disparo-variaveis -> a injecao das copies v1..v5 e feita DEPOIS, POR LOTE.
+Esta skill NAO dispara mensagem nenhuma; so coleta e ETIQUETA (add tag).
+
+A tag origem e sempre PRESERVADA: a skill so ADICIONA as tags de lote, nunca remove
+a origem. E idempotente: rerun reusa as tags de lote (POST /tags reaproveita a
+existente) e reaplicar uma tag num contato que ja a tem e inocuo.
+
+PEGADINHA JA RESOLVIDA (paginacao do Clint): GET /contacts?tag_ids=... devolve
+paginas VAZIAS transientes no meio da paginacao (mesmo com hasNext=true e faltando
+paginas). O coletor robusto do ClintClient (list_contacts_by_tag -> paginate_all)
+pagina de 1..totalPages e RETENTA a pagina vazia com backoff ate cobrir tudo,
+deduplicando por id. Isso e o que traz a base COMPLETA (ex: 17.688) em vez de so a
+fracao que o paginate antigo trazia (~1500, parava na 1a vazia).
+
+Uso:
+  python scripts/split_lotes.py --tag-origem "${RESOURCE_ID}" --dry-run
+  python scripts/split_lotes.py --tag-origem "${RESOURCE_ID}" --batch 5000
+  python scripts/split_lotes.py --tag-origem "X" --prefixo "Y" --batch 5000 --limpar-lotes
+
+Validado em producao 11/07/2026: tag ${RESOURCE_ID} (17.688 contatos)
+separada em 4 lotes de 5000 (5000, 5000, 5000, 2688).
+"""
+from __future__ import annotations
+
+import argparse
+import io
+import math
+import re
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+
+# Saida UTF-8 sempre (nomes de tag podem ter acento; terminal Windows nao garante).
+sys.stdout = io.TextIOWrapper(
+    sys.stdout.buffer, encoding="utf-8", errors="replace", line_buffering=True
+)
+sys.stderr = io.TextIOWrapper(
+    sys.stderr.buffer, encoding="utf-8", errors="replace", line_buffering=True
+)
+
+# Reusa o ClintClient da skill clint-api (fonte unica de auth + paginacao robusta).
+CLINT_API_SCRIPTS = Path.home() / ".claude" / "skills" / "clint-api" / "scripts"
+sys.path.insert(0, str(CLINT_API_SCRIPTS))
+from clint_client import ClintClient  # noqa: E402
+
+PAGE_LIMIT = 100        # max por pagina suportado pela API
+PAGE_TRIES = 8          # retries de pagina vazia (so no coletor LOCAL de defesa extra)
+MUT_TRIES = 5           # retries por contato ao aplicar/remover tag
+MUT_BACKOFF = 0.5       # base do backoff exponencial das mutacoes
+
+
+def _retry(fn, tries=MUT_TRIES, base=MUT_BACKOFF):
+    """Executa fn() com backoff exponencial. Retorna (ok: bool, resultado | excecao)."""
+    last = None
+    for i in range(tries):
+        try:
+            return True, fn()
+        except Exception as e:  # noqa: BLE001
+            last = e
+            if i < tries - 1:
+                time.sleep(base * (2 ** i))
+    return False, last
+
+
+def robust_collect_local(c, tag_id):
+    """Coletor robusto LOCAL (defesa extra). Identico ao split_lotes_v3: pagina de
+    1..totalPages e retenta a pagina vazia transiente com backoff antes de seguir.
+
+    Normalmente NAO e usado - o caminho padrao (coletar) reusa
+    c.list_contacts_by_tag(), que ja e robusto. Isto fica como fallback (flag
+    --coleta-local) pro caso do metodo do client regredir. Retorna
+    (lista_de_contatos, total_count, paginas_vazias_persistentes).
+    """
+    r0 = c.get("/contacts", params={"tag_ids": tag_id, "page": 1, "limit": PAGE_LIMIT})
+    total_count = r0.get("totalCount") or 0
+    total_pages = int(r0.get("totalPages") or 0)
+    ids: dict = {}
+
+    def add(items):
+        for it in items:
+            cid = it.get("id")
+            if cid:
+                ids[cid] = it
+
+    add(r0.get("data") or [])
+    vazias = []
+    for page in range(2, total_pages + 1):
+        items = []
+        for a in range(PAGE_TRIES):
+            ok, rr = _retry(
+                lambda p=page: c.get(
+                    "/contacts", params={"tag_ids": tag_id, "page": p, "limit": PAGE_LIMIT}
+                )
+            )
+            items = (rr.get("data") or []) if ok else []
+            if items:
+                break
+            time.sleep(0.4 * (a + 1))
+        if not items:
+            vazias.append(page)
+        add(items)
+    return list(ids.values()), total_count, vazias
+
+
+def coletar(c, tag_id, local=False):
+    """Coleta robusta dos contatos de uma tag. Retorna (lista, total_count, vazias).
+
+    Padrao (local=False): reusa c.list_contacts_by_tag() -> paginate_all, que ja
+    retenta pagina vazia transiente ate cobrir totalPages e deduplica por id. Depois
+    da chamada, o client expoe c.last_total_count e c.last_empty_pages (introspeccao
+    da ultima paginacao) - usamos isso pra reportar sem uma request extra.
+
+    local=True: usa o robust_collect_local (defesa extra), caso o metodo do client
+    regrida.
+    """
+    if local:
+        return robust_collect_local(c, tag_id)
+    contatos = c.list_contacts_by_tag(tag_id)
+    total = c.last_total_count if c.last_total_count is not None else len(contatos)
+    vazias = list(c.last_empty_pages or [])
+    return contatos, total, vazias
+
+
+def garantir_tag(c, nome):
+    """Acha a tag por nome exato ou cria (POST /tags). Retorna (tag_id, estado).
+
+    estado = 'existente' quando reusou uma tag ja criada (idempotencia), 'criada'
+    quando fez o POST. Reusar evita duplicar tags no rerun.
+    """
+    t = c.find_tag_by_name(nome)
+    if t:
+        return t["id"], "existente"
+    nova = c.post("/tags", body={"name": nome})
+    d = nova.get("data") or nova
+    return (d.get("id") or nova.get("id")), "criada"
+
+
+def mutar_paralelo(c, contatos, fn_por_contato, workers):
+    """Aplica fn_por_contato(contact_id) em paralelo (ThreadPoolExecutor) com retry.
+
+    Retorna (ok: int, falhas: list[(contact_id, msg)]).
+    """
+    ok, falhas = 0, []
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futs = {
+            ex.submit(_retry, (lambda ct=ct: fn_por_contato(ct["id"]))): ct
+            for ct in contatos
+        }
+        for fut in as_completed(futs):
+            sucesso, res = fut.result()
+            if sucesso:
+                ok += 1
+            else:
+                falhas.append((futs[fut].get("id"), str(res)[:120]))
+    return ok, falhas
+
+
+def chunks(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        description=(
+            "Separa TODOS os contatos de uma tag do Clint em lotes de tamanho fixo, "
+            "aplicando <prefixo>_LoteK por lote. Preserva a tag origem."
+        )
+    )
+    ap.add_argument("--tag-origem", required=True, help="Nome da tag origem (obrigatorio).")
+    ap.add_argument("--batch", type=int, default=5000, help="Tamanho de cada lote (default 5000).")
+    ap.add_argument(
+        "--prefixo",
+        default=None,
+        help="Prefixo das tags de lote. Default = nome da tag origem. "
+             "As tags viram <prefixo>_Lote1..k.",
+    )
+    ap.add_argument("--workers", type=int, default=8, help="Threads paralelas (default 8).")
+    ap.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="So mostra o plano (contatos, numero de lotes, tamanho de cada). "
+             "Nao cria nem aplica nada.",
+    )
+    ap.add_argument(
+        "--limpar-lotes",
+        action="store_true",
+        help="Antes de aplicar, remove as tags <prefixo>_LoteX pre-existentes dos "
+             "contatos que as tenham, pra reaplicar limpo (ex: quando ja havia um "
+             "lote provisorio). NAO toca na tag origem.",
+    )
+    ap.add_argument(
+        "--coleta-local",
+        action="store_true",
+        help="Usa o coletor robusto LOCAL (defesa extra) em vez do metodo do client. "
+             "So use se o metodo do client regredir.",
+    )
+    args = ap.parse_args()
+
+    if args.batch <= 0:
+        sys.exit("ERRO: --batch precisa ser > 0.")
+
+    prefixo = args.prefixo or args.tag_origem
+    c = ClintClient.from_master_env()
+
+    # 1) achar a tag origem
+    print(f"== tag origem: {args.tag_origem!r} ==")
+    origem = c.find_tag_by_name(args.tag_origem)
+    if not origem:
+        sys.exit(f"ERRO: tag origem {args.tag_origem!r} nao existe no Clint.")
+    origem_id = origem["id"]
+    print(f"  id={origem_id}")
+
+    # 2) coletar contatos (robusto, dedup por id)
+    print("== coletando contatos (robusto) ==")
+    base, total, vazias = coletar(c, origem_id, local=args.coleta_local)
+    n = len(base)
+    print(
+        f"  coletados unicos={n} | totalCount API={total} | "
+        f"paginas vazias persistentes={vazias}"
+    )
+    if total and abs(n - total) > 50:
+        print(
+            f"  ATENCAO: coletados ({n}) diverge do totalCount ({total}) em >50. "
+            f"Revisar antes de aplicar."
+        )
+
+    # plano dos lotes
+    nlotes = math.ceil(n / args.batch) if n else 0
+    print(
+        f"\nPLANO: {n} contatos | {nlotes} lote(s) de ate {args.batch} | "
+        f"prefixo={prefixo!r}"
+    )
+    for i in range(nlotes):
+        ini, fim = i * args.batch, min((i + 1) * args.batch, n)
+        print(f"  {prefixo}_Lote{i + 1}: {fim - ini}")
+
+    if args.dry_run:
+        print("\n[DRY-RUN] nada criado/aplicado. Rode sem --dry-run pra executar.")
+        return
+
+    if n == 0:
+        sys.exit("ERRO: 0 contatos coletados; nada a aplicar. (Tag vazia?)")
+
+    # 3) opcional: limpar tags de lote pre-existentes (reaplicar limpo)
+    if args.limpar_lotes:
+        print("\n== limpando tags de lote pre-existentes ==")
+        rex = re.compile(rf"^{re.escape(prefixo)}_Lote\d+$")
+        alvos = [t for t in c.list_tags() if rex.match((t.get("name") or "").strip())]
+        if not alvos:
+            print("  nenhuma tag <prefixo>_LoteX pre-existente encontrada.")
+        for t in alvos:
+            nome = (t.get("name") or "").strip()
+            holders, _, _ = coletar(c, t["id"], local=args.coleta_local)
+            if holders:
+                okr, falr = mutar_paralelo(
+                    c,
+                    holders,
+                    lambda cid, tid=t["id"]: c.remove_tag_from_contact(cid, tid),
+                    args.workers,
+                )
+                print(f"  {nome}: removida de {okr}/{len(holders)} | falhas {len(falr)}")
+            else:
+                print(f"  {nome}: 0 contatos (nada a remover)")
+
+    # 4) aplicar lotes definitivos (so ADICIONA tag de lote; origem intacta)
+    print("\n== aplicando lotes ==")
+    resumo = []
+    for i, lote in enumerate(chunks(base, args.batch), start=1):
+        nome = f"{prefixo}_Lote{i}"
+        tid, est = garantir_tag(c, nome)
+        okc, falc = mutar_paralelo(
+            c, lote, lambda cid, t=tid: c.add_tags_to_contact(cid, [t]), args.workers
+        )
+        print(f"  {nome} ({est} {tid}): aplicado {okc}/{len(lote)} | falhas {len(falc)}")
+        for cid, err in falc[:3]:
+            print(f"      FALHA {cid}: {err}")
+        resumo.append((nome, tid, len(lote), okc, len(falc)))
+
+    # 5) verificacao: releitura robusta de cada lote
+    print("\n== verificacao (releitura robusta de cada lote) ==")
+    time.sleep(3)  # settle read-after-write
+    for nome, tid, alvo, okc, nf in resumo:
+        conf, _, _ = coletar(c, tid, local=args.coleta_local)
+        print(f"  {nome}: alvo {alvo} | aplicado {okc} | falhas {nf} | conferido {len(conf)}")
+
+    print(
+        f"\n== tag origem {args.tag_origem!r} PRESERVADA "
+        f"(so adicionamos tags de lote, nada foi removido dela) =="
+    )
+    print("=== FIM ===")
+
+
+if __name__ == "__main__":
+    main()
+

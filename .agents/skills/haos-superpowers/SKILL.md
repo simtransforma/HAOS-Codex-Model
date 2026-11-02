@@ -70,3 +70,8 @@ Nao criar hook, daemon, memoria ou configuracao global.
   nao instalar ou inventar conteudo upstream.
 - Autor so fez checks estaticos e pede selo comportamental: relatar cobertura
   estatica e encaminhar cenarios ao revisor, sem promover evidencia.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

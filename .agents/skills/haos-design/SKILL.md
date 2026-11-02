@@ -66,3 +66,8 @@ nem esconda erro com texto generico. Publicacao e deploy exigem OK aplicavel.
 - Erro no formulario: preservar entrada, associar mensagem e permitir recuperacao.
 - Uso so por teclado: verificar foco visivel e ausencia de armadilhas.
 - Navegador indisponivel: entregar especificacao com QA visual pendente, sem simular sucesso.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

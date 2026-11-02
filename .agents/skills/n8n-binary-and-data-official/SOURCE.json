@@ -1,0 +1,69 @@
+{
+  "repo": "n8n-io/skills",
+  "commit": "180b8415e3b73f78828cfa01e908e67f89f2a139",
+  "license": "Apache-2.0",
+  "path": "skills/n8n-binary-and-data-official",
+  "localAdaptation": "HAOS 2026-10-04; see ADAPTACAO-HAOS.md; upstream bodies include identified local corrections",
+  "upstreamFiles": [
+    {
+      "path": "LICENSE",
+      "gitBlob": "c87e50b21d7195576cfda86509960d9f80a1d3bd",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "skills/n8n-binary-and-data-official/SKILL.md",
+      "gitBlob": "44452e39fb179aac07cd2bfa9c685ea263881fe0",
+      "sha256": "a2f7684204ef6d41ab3ac0c3c9a9cf567904b8b683e85f0e9b51cf1f88f9f493"
+    },
+    {
+      "path": "skills/n8n-binary-and-data-official/references/AGENT_TOOL_BINARY.md",
+      "gitBlob": "7589dbc15c16d5795f0352c5bef70e0dba299686",
+      "sha256": "0755dbce51eb2ef6adef68e3149b6a3539aed7397cd114e44a68347c057590ff"
+    },
+    {
+      "path": "skills/n8n-binary-and-data-official/references/BINARY_BASICS.md",
+      "gitBlob": "d80b902ad506f71c5a8397c7d79c3fb4ffa4d3ad",
+      "sha256": "90fb1c9305382a3365b083a5ed06fe84757bb43b3fb1636c509dc3b054065e90"
+    },
+    {
+      "path": "skills/n8n-binary-and-data-official/references/CDN_REQUIREMENT.md",
+      "gitBlob": "3270d8cf70d2e5c0de744f204c7328d55eaa41d5",
+      "sha256": "79e664507bf1fcbaca37b5b57fbdc213ed602aecb395a319e3b5c4a7943a43bd"
+    },
+    {
+      "path": "skills/n8n-binary-and-data-official/references/MERGE_FOR_CONTEXT.md",
+      "gitBlob": "592e9cf00d195e91ef54c79c3d226a3e4669e222",
+      "sha256": "c3b7cb7c68d94c7417dfb19fdd733a99dea67199b28c5a02d7b009db47b4912e"
+    }
+  ],
+  "installedFiles": [
+    {
+      "path": "ADAPTACAO-HAOS.md",
+      "sha256": "fa224947236ecbd30cf2c39618ada3bc14690df78bb5607ee9caf4b9aa9b16f1"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "references/AGENT_TOOL_BINARY.md",
+      "sha256": "a20e51cd4309922caad487df9f3964e15ccdeff2fabc25b3dfde203bd591b82b"
+    },
+    {
+      "path": "references/BINARY_BASICS.md",
+      "sha256": "cad398964c26f9c797e0e80794b6982dfa7d9a26580ec056f1256138ebd25aa3"
+    },
+    {
+      "path": "references/CDN_REQUIREMENT.md",
+      "sha256": "0256ac54101e83fa55b1c9fc738549c6809a938c3b5ed6ad42a4dfd742bb0890"
+    },
+    {
+      "path": "references/MERGE_FOR_CONTEXT.md",
+      "sha256": "4a05101dbe581ef37f7579e4f0855e8b7cbd3f6cbc2b216ee8bc269abe7e0fa4"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "5f873b7530e577dd593cbf58773ca4db1a6b384c2713e22834bcb6bd95cc82a8"
+    }
+  ]
+}

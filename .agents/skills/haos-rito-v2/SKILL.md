@@ -76,3 +76,8 @@ nenhuma ativacao inferida de planejamento. `haos-quality-gates` orienta QA e
   nao remove defeito nem fornece OK.
 - Projeto interno sem midia ou deploy: justificar N/A nas fases pertinentes,
   preservar as dependencias e fechar apenas o escopo contratado.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

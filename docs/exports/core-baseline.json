@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "expected_count": 29,
+  "entries": [
+    {
+      "path": ".agents/skills/haos-claim-verification/SKILL.md",
+      "characters": 3335,
+      "sha256": "2414d1553d65230e372fb04e32b99d0203f9b155f152e11bd21b901b8124911a"
+    },
+    {
+      "path": ".agents/skills/haos-conselho/SKILL.md",
+      "characters": 3668,
+      "sha256": "b72c86315f6870b433dd5a3f5d8b71cac1fd14927d3da2fc2ca3f688bee3a1c2"
+    },
+    {
+      "path": ".agents/skills/haos-copy/SKILL.md",
+      "characters": 3478,
+      "sha256": "e36bca150b7581af05ee7071175ae4a281c29765cd643c60acba3b95f75bd8c7"
+    },
+    {
+      "path": ".agents/skills/haos-deep-research/SKILL.md",
+      "characters": 3703,
+      "sha256": "082ff0fee212e7bfedc7b5a0a7a6ce94ccd18942a30759a358be35dffa1e7c41"
+    },
+    {
+      "path": ".agents/skills/haos-departamentos/SKILL.md",
+      "characters": 3548,
+      "sha256": "e5c1ba98f4f48d42d1a2d99e42f0d4a9fa416cecb1435e4393cb83089a5d1ce9"
+    },
+    {
+      "path": ".agents/skills/haos-design/SKILL.md",
+      "characters": 3643,
+      "sha256": "08031db4a5e59a777b32091caf733b8b5de470df25864d9965f47bebd9663370"
+    },
+    {
+      "path": ".agents/skills/haos-dump-import/SKILL.md",
+      "characters": 3674,
+      "sha256": "4f2d733a23572bb23e64b2a64f21314555d77fa63ef79cac3cbced554d95546f"
+    },
+    {
+      "path": ".agents/skills/haos-engineering/SKILL.md",
+      "characters": 3295,
+      "sha256": "c7aa931d25b5bb69949adde7af3e65b71c91e18f40f8254b61f3a03a1f79d7ca"
+    },
+    {
+      "path": ".agents/skills/haos-evidence/SKILL.md",
+      "characters": 3056,
+      "sha256": "b8e96b84383569d973687f42ba81b2c37d9710b1dd5da7ced92c06d31985bcaf"
+    },
+    {
+      "path": ".agents/skills/haos-evoluir/SKILL.md",
+      "characters": 5284,
+      "sha256": "37aa117253512226b6dec9cd6aeda298b65716f9e2fa14082e380bcef85092d4"
+    },
+    {
+      "path": ".agents/skills/haos-execution-waves/SKILL.md",
+      "characters": 3367,
+      "sha256": "35a49c307c13beb1c54ad23598b11e498bf353277f4497b6bd3b8c034089e0b1"
+    },
+    {
+      "path": ".agents/skills/haos-mega-brain/SKILL.md",
+      "characters": 3851,
+      "sha256": "86022b2fc8bccd9dec482a9a8c4b99b9fc13e764cbaeb43048b1a14c34b9fa7b"
+    },
+    {
+      "path": ".agents/skills/haos-memory-provenance/SKILL.md",
+      "characters": 4674,
+      "sha256": "4d0ebda4e0b74d0905a93f284b9658ed60979f2cbc8c5775e3a2fa021c3c1502"
+    },
+    {
+      "path": ".agents/skills/haos-memory/SKILL.md",
+      "characters": 3355,
+      "sha256": "5cbeee97f5ecfb090802512d3ff28251bb3767c2dee08412306682d3be640221"
+    },
+    {
+      "path": ".agents/skills/haos-menu/SKILL.md",
+      "characters": 3374,
+      "sha256": "cd6cebfadf94d9e75fcd182e51420303a2a6f758f8a4a8226e69ec2b7626a025"
+    },
+    {
+      "path": ".agents/skills/haos-model-router/SKILL.md",
+      "characters": 3798,
+      "sha256": "ba22965c4a8fa591568a4cac5e2e39bb31279d78c61575a46d054dd23f00e6c1"
+    },
+    {
+      "path": ".agents/skills/haos-multi-agent-review/SKILL.md",
+      "characters": 3723,
+      "sha256": "42c4b0b464b94716e6c76f09c2682115602be9473582d12631e7e61db2f48ada"
+    },
+    {
+      "path": ".agents/skills/haos-quality-gates/SKILL.md",
+      "characters": 4045,
+      "sha256": "bcb8af5bfa75040f2cfce24a2c78dd14bd4d407f048a128d1a7acfa3c09ddd31"
+    },
+    {
+      "path": ".agents/skills/haos-rito-v2/SKILL.md",
+      "characters": 4649,
+      "sha256": "9dc6feb0db032705a64b3a4740b8aa459e1c98147f1cbf426c8f7630b1591584"
+    },
+    {
+      "path": ".agents/skills/haos-router/SKILL.md",
+      "characters": 3980,
+      "sha256": "d470002c2caac4f79ceac58225f4fe509bf3ab3b88e5932891bc789de8c652aa"
+    },
+    {
+      "path": ".agents/skills/haos-security-review/SKILL.md",
+      "characters": 3305,
+      "sha256": "a9b75cca510429349f0bf5a4a3b156de25eb2dc40a3edae16908e193e734088f"
+    },
+    {
+      "path": ".agents/skills/haos-session-dump/SKILL.md",
+      "characters": 3814,
+      "sha256": "6d2a2c3738d049d4e86617a7550b443e486eef8e03749171578a6abeb2d52318"
+    },
+    {
+      "path": ".agents/skills/haos-session-handoff/SKILL.md",
+      "characters": 3588,
+      "sha256": "64751e445ea5046a92d75f255e0dbb9988b3b5c162388dd4256062a5ab90bbf3"
+    },
+    {
+      "path": ".agents/skills/haos-source-quality-auditor/SKILL.md",
+      "characters": 3369,
+      "sha256": "a408be3fd009a93277f50122af90cbc43f112a2e32f643278da2852abb93cff5"
+    },
+    {
+      "path": ".agents/skills/haos-squad/SKILL.md",
+      "characters": 4057,
+      "sha256": "025b8d62f5e3676035909612b26f081b976f2c06e20da5e084317abd78a36f83"
+    },
+    {
+      "path": ".agents/skills/haos-structural-refactor/SKILL.md",
+      "characters": 4113,
+      "sha256": "33e1aeda26edb8dc95bd24865cf38f0c2dd5a456077cf39c7e336070ce479843"
+    },
+    {
+      "path": ".agents/skills/haos-superpowers/SKILL.md",
+      "characters": 3635,
+      "sha256": "70d4c129d3fae564c1b805f306ad45337a600723c3d0f66dd700b1778520595b"
+    },
+    {
+      "path": ".agents/skills/haos-task-loop/SKILL.md",
+      "characters": 3971,
+      "sha256": "9d65e3efa3e25764503337d7929cf150e29a716755e976505badfb58f97faea9"
+    },
+    {
+      "path": ".agents/skills/haos-worktree/SKILL.md",
+      "characters": 3365,
+      "sha256": "c8a3bd0b9b311f50b65fc641946b54ce6c40b9cfe9233aaf12422c42977dc332"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Revisar Lógica de Ticketing"
+  short_description: "Revisão de autorização, inventário, compra e ingressos"
+  default_prompt: "Revise a lógica de negócio de ticketing com testes seguros e orientados a invariantes."

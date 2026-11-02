@@ -1,0 +1,33 @@
+{
+  "repo": "n8n-io/skills",
+  "commit": "180b8415e3b73f78828cfa01e908e67f89f2a139",
+  "license": "Apache-2.0",
+  "path": "skills/n8n-expressions-official",
+  "localAdaptation": "HAOS 2026-10-04; see ADAPTACAO-HAOS.md; upstream bodies include identified local corrections",
+  "upstreamFiles": [
+    {
+      "path": "LICENSE",
+      "gitBlob": "c87e50b21d7195576cfda86509960d9f80a1d3bd",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "skills/n8n-expressions-official/SKILL.md",
+      "gitBlob": "76de420cb9b0be4782869598d791b5c2523ef74b",
+      "sha256": "62659f76ca5a64fa4d5959fb9dd9c5d46c40a5ea3d02478be1e863040dc2aeb5"
+    }
+  ],
+  "installedFiles": [
+    {
+      "path": "ADAPTACAO-HAOS.md",
+      "sha256": "fa224947236ecbd30cf2c39618ada3bc14690df78bb5607ee9caf4b9aa9b16f1"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "70c088c66b170601f8248eabd0a8c89b715790e48508877a94113f6ec4cf63ca"
+    }
+  ]
+}

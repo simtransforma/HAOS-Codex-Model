@@ -1,0 +1,4 @@
+interface:
+  display_name: "Limpar Listas de Prospecção"
+  short_description: "Higieniza, valida e prioriza bases comerciais"
+  default_prompt: "Use $clean-prospect-lists para auditar, deduplicar, validar e priorizar esta base de prospecção."

@@ -69,3 +69,8 @@ distribuir. Nao invente citacao para preencher resposta vazia.
 - Fontes discordam: registrar ambas e os limites de conciliacao.
 - Escrita retorna sucesso, readback falha: destino PENDENTE, sem alegar ingestao verificada.
 - Nenhum destino configurado: entregar proposta, sem instalar ou conectar servico.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

@@ -66,3 +66,8 @@ Reutilizar consentimento valido sem exigir renovacao por mero decurso de tempo.
   trabalho local independente.
 - Terceira correcao falha: devolver REVISAO NECESSARIA com tentativas e defeito;
   nao abrir outra onda identica para reiniciar o contador.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

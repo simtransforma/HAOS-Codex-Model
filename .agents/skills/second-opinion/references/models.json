@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "default_reviewers": [
+    "codex",
+    "claude",
+    "gemini",
+    "kimi"
+  ],
+  "fallback": "never_silent",
+  "default_focus": "general",
+  "max_concurrency": 3,
+  "timeout_seconds": 600,
+  "reviewers": {
+    "codex": {
+      "requested": "GPT Astra isolado",
+      "selection": "fixed",
+      "model": "gpt-6-astra",
+      "reasoning_effort": "max",
+      "context": "fresh_no_resume_no_fork",
+      "evidence": "local Codex models_cache.json; max supported",
+      "verified_at": "2026-09-18",
+      "inference_tested": false
+    },
+    "claude": {
+      "requested": "Claude Fable 5.1",
+      "selection": "fixed",
+      "model": "claude-fable-5-1",
+      "effort": "max",
+      "evidence": "https://service.example.invalid",
+      "verified_at": "2026-09-18",
+      "inference_tested": false
+    },
+    "gemini": {
+      "requested": "Gemini mais capaz disponivel",
+      "selection": "highest_capability_available",
+      "candidate_model": "gemini-3.1-pro-preview",
+      "resolve_before_each_run": true,
+      "evidence": "https://service.example.invalid",
+      "verified_at": "2026-09-18",
+      "inference_tested": false
+    },
+    "kimi": {
+      "requested": "Kimi mais capaz disponivel",
+      "selection": "highest_capability_available",
+      "candidate_cli_model": "kimi-code/k3",
+      "candidate_api_model": "k3",
+      "effort": "max",
+      "resolve_before_each_run": true,
+      "evidence": "https://service.example.invalid",
+      "verified_at": "2026-09-18",
+      "inference_tested": false
+    }
+  }
+}

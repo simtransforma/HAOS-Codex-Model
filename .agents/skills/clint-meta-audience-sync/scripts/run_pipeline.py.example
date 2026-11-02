@@ -1,0 +1,565 @@
+#!/usr/bin/env python3
+"""
+Pipeline Clint Tag → Meta Custom Audience + workflow n8n auto-sync.
+
+Padrão validado em produção 06/06/2026.
+
+Uso:
+    python run_pipeline.py \\
+        --tag "Assinou_LP-060626" \\
+        --audience-name "[Clint] [FPV369] [Assinou ListaP]" \\
+        --ad-account "${RESOURCE_ID}" \\
+        --bm BM01
+
+Fases:
+    1. Upload inicial Clint → Meta
+    2. Workflow n8n auto-sync (cron 30min)
+    3. Documentação na vault Obsidian
+
+Ver SKILL.md pra triggers do user e references/ pra detalhes técnicos.
+"""
+import argparse
+import csv
+import hashlib
+import json
+import os
+import re
+import sys
+import time
+import unicodedata
+import urllib.error
+import urllib.parse
+import urllib.request
+from collections import Counter
+from datetime import datetime
+from pathlib import Path
+
+# ===== Constantes (padrão HAOS validado em produção 06/06/2026) =====
+MASTER_ENV_PATH = Path(r"${HAOS_PRIVATE_ROOT}")
+VAULT_TAREFAS = Path(r"${HAOS_PRIVATE_ROOT}")
+WORKFLOW_BASE_ID = "${RESOURCE_ID}"  # base do n8n no Hetzner
+N8N_FOLDER_PUBLIC_AUDIENCE_SYNC = "${RESOURCE_ID}"
+N8N_CRED_CLINT = "${RESOURCE_ID}"
+N8N_CRED_META = "${RESOURCE_ID}"
+N8N_CRED_EVOLUTION = "${RESOURCE_ID}"
+GRAPH_VERSION = "v21.0"
+
+# ===== Helpers =====
+def load_env() -> dict:
+    if not MASTER_ENV_PATH.exists():
+        sys.exit(f"FATAL: MASTER.env nao encontrado em {MASTER_ENV_PATH}")
+    env = {}
+    with open(MASTER_ENV_PATH, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            env[k.strip()] = v.strip().strip('"').strip("'")
+    return env
+
+
+def slugify(s: str) -> str:
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
+    s = re.sub(r"[^\w\s-]", "", s).strip().lower()
+    return re.sub(r"[\s-]+", "_", s)
+
+
+def http_get(url: str, headers: dict = None, timeout: int = 30) -> dict:
+    req = urllib.request.Request(url, headers=headers or {})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode())
+
+
+def http_post(url: str, body, headers: dict = None, json_body: bool = False,
+              timeout: int = 60) -> dict:
+    hdrs = dict(headers or {})
+    if json_body:
+        data = json.dumps(body).encode()
+        hdrs["Content-Type"] = "application/json"
+    elif isinstance(body, dict):
+        data = urllib.parse.urlencode(body).encode()
+    else:
+        data = body
+    req = urllib.request.Request(url, data=data, method="POST", headers=hdrs)
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read().decode())
+
+
+def sha256_hex(s: str) -> str:
+    return hashlib.sha256(s.encode("utf-8")).hexdigest() if s else ""
+
+
+# ===== Normalização (mesma usada em todos uploads anteriores) =====
+EMAIL_RE = re.compile(r"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$")
+DIGITS_RE = re.compile(r"\d+")
+SCHEMA = ["EMAIL", "PHONE", "FN", "LN", "ZIP", "CT", "ST", "COUNTRY", "EXTERN_ID"]
+
+
+def only_digits(s: str) -> str:
+    return "".join(DIGITS_RE.findall(s or ""))
+
+
+STATE_MAP = {
+    "sao paulo": "sp", "são paulo": "sp", "sp": "sp",
+    "rio de janeiro": "rj", "rj": "rj",
+    "minas gerais": "mg", "mg": "mg",
+    "rio grande do sul": "rs", "rs": "rs",
+    "parana": "pr", "paraná": "pr", "pr": "pr",
+    "santa catarina": "sc", "sc": "sc",
+    "bahia": "ba", "ba": "ba",
+    "ceara": "ce", "ceará": "ce", "ce": "ce",
+    "distrito federal": "df", "df": "df",
+    "goias": "go", "goiás": "go", "go": "go",
+    "pernambuco": "pe", "pe": "pe",
+    "espirito santo": "es", "espírito santo": "es", "es": "es",
+    "amazonas": "am", "am": "am",
+    "mato grosso": "mt", "mt": "mt",
+    "mato grosso do sul": "ms", "ms": "ms",
+    "para": "pa", "pará": "pa", "pa": "pa",
+    "maranhao": "ma", "maranhão": "ma", "ma": "ma",
+    "paraiba": "pb", "paraíba": "pb", "pb": "pb",
+    "piaui": "pi", "piauí": "pi", "pi": "pi",
+    "rio grande do norte": "rn", "rn": "rn",
+    "alagoas": "al", "al": "al",
+    "sergipe": "se", "se": "se",
+    "rondonia": "ro", "rondônia": "ro", "ro": "ro",
+    "tocantins": "to", "to": "to",
+    "acre": "ac", "ac": "ac",
+    "amapa": "ap", "amapá": "ap", "ap": "ap",
+    "roraima": "rr", "rr": "rr",
+}
+
+
+def normalize_contact(c: dict) -> dict:
+    """Recebe contato Clint, devolve dict normalizado pronto pra hash.
+
+    Clint coloca PII em `fields.*` (cep, doc, cidade, estado, sobrenome)
+    e telefone em `fullPhone`. Estado pode vir como nome longo ou UF.
+    """
+    fields = c.get("fields") or {}
+    org_fields = (c.get("organization") or {}).get("fields") or {}
+
+    email = (c.get("email") or "").strip().lower()
+    phone = only_digits(
+        c.get("fullPhone") or c.get("complete_phone") or c.get("phone") or ""
+    )
+    if phone and len(phone) in (10, 11):
+        phone = "55" + phone
+    elif phone and phone.startswith("55") and 12 <= len(phone) <= 13:
+        pass
+    elif phone:
+        phone = ""
+
+    name = (c.get("name") or "").strip()
+    sob = (fields.get("sobrenome") or c.get("sobrenome") or "").strip()
+    cep = only_digits(fields.get("cep") or c.get("cep") or "")
+    cep = cep if len(cep) == 8 else ""
+
+    em_ok = bool(EMAIL_RE.match(email))
+    ph_ok = bool(phone and len(phone) in (12, 13))
+
+    if not (em_ok or ph_ok):
+        return None  # descarta
+
+    parts = name.split() if name else []
+    fn = parts[0].lower() if parts else ""
+    if sob:
+        ln = sob.split()[0].lower()
+    elif len(parts) > 1:
+        ln = parts[-1].lower()
+    else:
+        ln = ""
+
+    cidade = (fields.get("cidade") or c.get("cidade") or "").strip().lower()
+    estado_raw = (
+        fields.get("estado") or org_fields.get("state")
+        or c.get("estado") or ""
+    ).strip().lower()
+    estado = STATE_MAP.get(estado_raw, "")
+
+    return {
+        "email": email if em_ok else "",
+        "phone": phone if ph_ok else "",
+        "fn": fn,
+        "ln": ln,
+        "zip": cep,
+        "ct": cidade,
+        "st": estado,
+        "country": "br",
+        "extern_id": cpf,
+    }
+
+
+def to_hash_row(r: dict) -> list:
+    return [
+        sha256_hex(r["email"]),
+        sha256_hex(r["phone"]),
+        sha256_hex(r["fn"]),
+        sha256_hex(r["ln"]),
+        sha256_hex(r["zip"]),
+        sha256_hex(r["ct"]),
+        sha256_hex(r["st"]),
+        sha256_hex(r["country"]),
+        sha256_hex(r["extern_id"]),
+    ]
+
+
+# ===== Clint API =====
+def clint_resolve_tag_id(env: dict, tag_name: str) -> tuple[str, str]:
+    """Devolve (tag_id_uuid, tag_name_exato_da_clint).
+
+    Bug Clint API: ?search= NÃO filtra (retorna 100 tags quaisquer).
+    Tenta search primeiro (rápido) e cai pra paginação completa se não casar.
+    """
+    tok = (env.get("CLINT_API_TOKEN") or env.get("CLINT_TOKEN")
+           or env.get("CLINT_API_KEY"))
+    if not tok:
+        sys.exit("FATAL: token Clint nao encontrado no MASTER.env")
+    headers = {"api-token": tok, "accept": "application/json"}
+    base = env.get("CLINT_API_URL", "https://api.clint.digital/v1").rstrip("/")
+    target = tag_name.strip()
+    # 1) search
+    url = f"{base}/tags?search={urllib.parse.quote(target)}&limit=100"
+    r = http_get(url, headers=headers)
+    items = r.get("data") or r.get("tags") or []
+    for t in items:
+        if (t.get("name") or "").strip() == target:
+            return t["id"], t["name"]
+    # 2) paginação completa
+    page = 1
+    while page <= 100:
+        url = f"{base}/tags?limit=100&page={page}"
+        r = http_get(url, headers=headers)
+        items = r.get("data") or r.get("tags") or []
+        for t in items:
+            if (t.get("name") or "").strip() == target:
+                return t["id"], t["name"]
+        if not r.get("hasNext") and not r.get("has_next"):
+            break
+        page += 1
+    sys.exit(f"FATAL: tag '{tag_name}' nao encontrada no Clint apos paginacao")
+
+
+def clint_fetch_contacts_by_tag(env: dict, tag_id: str) -> list:
+    """Busca todos os contatos da tag (paginado). Usa hasNext da Clint."""
+    tok = (env.get("CLINT_API_TOKEN") or env.get("CLINT_TOKEN")
+           or env.get("CLINT_API_KEY"))
+    headers = {"api-token": tok, "accept": "application/json"}
+    base = env.get("CLINT_API_URL", "https://api.clint.digital/v1").rstrip("/")
+    all_contacts = []
+    page = 1
+    while page <= 200:
+        url = f"{base}/contacts?tag_ids={tag_id}&page={page}&limit=100"
+        r = http_get(url, headers=headers)
+        items = r.get("data") or r.get("contacts") or []
+        all_contacts.extend(items)
+        has_next = r.get("hasNext") if "hasNext" in r else r.get("has_next")
+        if not has_next or not items:
+            break
+        page += 1
+        time.sleep(0.2)
+    return all_contacts
+
+
+# ===== Meta API =====
+def meta_create_audience(env: dict, ad_account: str, bm: str, name: str,
+                         description: str) -> str:
+    tok_key = f"META_TOKEN_{bm.upper()}"
+    tok = env.get(tok_key)
+    if not tok:
+        sys.exit(f"FATAL: {tok_key} nao encontrado no MASTER.env")
+    url = (
+        f"https://graph.facebook.com/{GRAPH_VERSION}/{ad_account}/customaudiences"
+        f"?access_token={tok}"
+    )
+    body = {
+        "name": name,
+        "subtype": "CUSTOM",
+        "description": description,
+        "customer_file_source": "USER_PROVIDED_ONLY",
+    }
+    r = http_post(url, body)
+    return r["id"]
+
+
+def meta_upload_users(env: dict, bm: str, audience_id: str, records: list) -> dict:
+    tok_key = f"META_TOKEN_{bm.upper()}"
+    tok = env[tok_key]
+    BATCH = 10000
+    session_id = int(time.time())
+    batches = [records[i:i + BATCH] for i in range(0, len(records), BATCH)]
+    last = {"num_received": 0, "num_invalid_entries": 0}
+    for idx, batch in enumerate(batches, 1):
+        payload = {
+            "payload": {
+                "schema": SCHEMA,
+                "data": [to_hash_row(r) for r in batch],
+            },
+            "session": {
+                "session_id": session_id,
+                "batch_seq": idx,
+                "last_batch_flag": idx == len(batches),
+                "estimated_num_total": len(records),
+            },
+        }
+        url = (
+            f"https://graph.facebook.com/{GRAPH_VERSION}/{audience_id}/users"
+            f"?access_token={tok}"
+        )
+        r = http_post(url, payload, json_body=True, timeout=180)
+        last = r
+    return last
+
+
+# ===== n8n API =====
+def n8n_duplicate_workflow(env: dict, new_workflow_name: str, tag_id: str,
+                           tag_name: str, audience_id: str,
+                           audience_name: str) -> tuple[str, str]:
+    """Duplica WORKFLOW_BASE_ID, ajusta Init State, ativa. Devolve (id, url)."""
+    n8n_url = env.get("N8N_API_URL")
+    n8n_key = env.get("N8N_API_KEY")
+    if not (n8n_url and n8n_key):
+        sys.exit("FATAL: N8N_API_URL ou N8N_API_KEY nao encontrados no MASTER.env")
+    # Normaliza: aceita base com ou sem /api/v1
+    n8n_url = n8n_url.rstrip("/")
+    if not n8n_url.endswith("/api/v1"):
+        n8n_url = n8n_url + "/api/v1"
+    headers = {"X-N8N-API-KEY": n8n_key}
+
+    # 1. Pega workflow base
+    base = http_get(f"{n8n_url}/workflows/{WORKFLOW_BASE_ID}",
+                    headers=headers)
+
+    # 2. Clona em memória e ajusta Init State
+    new = {
+        "name": new_workflow_name,
+        "nodes": base["nodes"],
+        "connections": base["connections"],
+        "settings": base.get("settings", {}),
+    }
+    for n in new["nodes"]:
+        if (n.get("name") or "").lower() in ("init state", "initstate"):
+            params = n.get("parameters") or {}
+            # Pode ser node Set ou Code; ajustar conforme estrutura
+            # Estrutura comum (n8n Set node): parameters.assignments.assignments[]
+            assigns = (params.get("assignments") or {}).get("assignments", [])
+            for a in assigns:
+                nm = a.get("name") or ""
+                if nm == "tag_id":
+                    a["value"] = tag_id
+                elif nm == "tag_name":
+                    a["value"] = tag_name
+                elif nm == "audience_id":
+                    a["value"] = audience_id
+                elif nm == "audience_name":
+                    a["value"] = audience_name
+            # fallback Code node: replace literais por busca/substituição simples
+            if "jsCode" in params:
+                code = params["jsCode"]
+                code = re.sub(r"tag_id\s*:\s*['\"][^'\"]+['\"]",
+                              f"tag_id: '{tag_id}'", code)
+                code = re.sub(r"tag_name\s*:\s*['\"][^'\"]+['\"]",
+                              f"tag_name: '{tag_name}'", code)
+                code = re.sub(r"audience_id\s*:\s*['\"][^'\"]+['\"]",
+                              f"audience_id: '{audience_id}'", code)
+                code = re.sub(r"audience_name\s*:\s*['\"][^'\"]+['\"]",
+                              f"audience_name: '{audience_name}'", code)
+                params["jsCode"] = code
+
+    # 3. Cria workflow novo
+    created = http_post(f"{n8n_url}/workflows", new,
+                        headers=headers, json_body=True)
+    workflow_id = created["id"]
+
+    # 4. Aplica tag/folder
+    try:
+        http_post(
+            f"{n8n_url}/workflows/{workflow_id}/tags",
+            {"tagIds": [N8N_FOLDER_PUBLIC_AUDIENCE_SYNC]},
+            headers=headers, json_body=True,
+        )
+    except Exception:
+        pass  # tag opcional, não bloqueia
+
+    # 5. Ativa
+    http_post(f"{n8n_url}/workflows/{workflow_id}/activate", {},
+              headers=headers, json_body=True)
+
+    # editor URL é no host base (sem /api/v1)
+    editor_base = n8n_url[:-len("/api/v1")] if n8n_url.endswith("/api/v1") else n8n_url
+    editor_url = f"{editor_base}/workflow/{workflow_id}"
+    return workflow_id, editor_url
+
+
+# ===== Documentação =====
+def write_vault_docs(folder: Path, *, tag_name: str, tag_id: str, ad_account: str,
+                     audience_id: str, audience_name: str, workflow_id: str,
+                     editor_url: str, stats: dict, meta_result: dict) -> None:
+    folder.mkdir(parents=True, exist_ok=True)
+    readme = f"""# {audience_name}
+
+**Data:** {datetime.now().strftime("%d-%m-%Y %H:%M BRT")}
+**Tag origem (Clint):** `{tag_name}` (tag_id `{tag_id}`)
+**Conta Meta:** `{ad_account}`
+
+## Audience inicial
+
+| | |
+|---|---|
+| Audience ID | `{audience_id}` |
+| Nome | `{audience_name}` |
+| Contatos na tag | {stats.get("total", 0)} |
+| Únicos enviados | {stats.get("uploaded", 0)} |
+| Descartados (sem chave) | {stats.get("descartado", 0)} |
+| Duplicatas removidas | {stats.get("duplicata", 0)} |
+| Meta `num_received` | {meta_result.get("num_received", 0)} |
+| Meta `num_invalid_entries` | {meta_result.get("num_invalid_entries", 0)} |
+
+## Workflow n8n auto-sync
+
+| | |
+|---|---|
+| Workflow ID | `{workflow_id}` |
+| URL editor | {editor_url} |
+| Frequência | Cron 30 minutos (America/Sao_Paulo) |
+| Folder n8n | "Public Audience Sync" |
+
+Mantém a audience alimentada com leads novos da tag automaticamente.
+
+## Verificar status
+
+```bash
+PYTHONIOENCODING=utf-8 python -c "
+import urllib.request,json
+env={{l.split('=',1)[0].strip():l.split('=',1)[1].strip().strip(chr(34)).strip(chr(39)) for l in open(r'...MASTER.env',encoding='utf-8') if '=' in l and not l.strip().startswith('#')}}
+tok=env['META_TOKEN_BM01']
+r=json.loads(urllib.request.urlopen(f'https://graph.facebook.com/v21.0/{audience_id}?fields=name,operation_status,approximate_count_lower_bound,approximate_count_upper_bound&access_token={{tok}}').read())
+print(r['name'],'->',r.get('operation_status',{{}}).get('description'),f\\\"{{r.get('approximate_count_lower_bound')}}-{{r.get('approximate_count_upper_bound')}}\\\")"
+```
+
+## Gerado pela skill `clint-meta-audience-sync`
+"""
+    (folder / "README.md").write_text(readme, encoding="utf-8")
+    (folder / "resultado.json").write_text(
+        json.dumps(
+            {
+                "timestamp": datetime.now().isoformat(),
+                "tag_name": tag_name,
+                "tag_id": tag_id,
+                "ad_account": ad_account,
+                "audience_id": audience_id,
+                "audience_name": audience_name,
+                "workflow_id": workflow_id,
+                "editor_url": editor_url,
+                "stats": stats,
+                "meta_result": meta_result,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+
+# ===== Main =====
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--tag", required=True, help="Nome exato da tag no Clint")
+    ap.add_argument("--audience-name", required=True,
+                    help="Nome da Custom Audience na Meta")
+    ap.add_argument("--ad-account", default="${RESOURCE_ID}")
+    ap.add_argument("--bm", default="BM01")
+    ap.add_argument("--skip-workflow", action="store_true",
+                    help="Pula a Fase 2 (só upload inicial + docs)")
+    args = ap.parse_args()
+
+    env = load_env()
+
+    print(f"[1/3] Resolvendo tag '{args.tag}' no Clint...")
+    tag_id, tag_name = clint_resolve_tag_id(env, args.tag)
+    print(f"      tag_id={tag_id}")
+
+    print(f"[1/3] Buscando contatos da tag (paginado)...")
+    contacts = clint_fetch_contacts_by_tag(env, tag_id)
+    print(f"      {len(contacts):,} contatos brutos")
+
+    seen = set()
+    records = []
+    stats = Counter()
+    stats["total"] = len(contacts)
+    for c in contacts:
+        n = normalize_contact(c)
+        if not n:
+            stats["descartado"] += 1
+            continue
+        k = (n["email"], n["phone"])
+        if k in seen:
+            stats["duplicata"] += 1
+            continue
+        seen.add(k)
+        records.append(n)
+    stats["uploaded"] = len(records)
+    print(f"      únicos pra upload: {len(records):,}")
+
+    print(f"[2/3] Criando audience na Meta ({args.bm} {args.ad_account})...")
+    desc = (
+        f"Auto-sync Clint tag '{args.tag}' "
+        f"(id {tag_id}) - {datetime.now().strftime('%d/%m/%Y')}"
+    )
+    audience_id = meta_create_audience(
+        env, args.ad_account, args.bm, args.audience_name, desc,
+    )
+    print(f"      audience_id={audience_id}")
+
+    print(f"[2/3] Upload {len(records):,} contatos em batches de 10k...")
+    meta_result = meta_upload_users(env, args.bm, audience_id, records)
+    print(f"      num_received={meta_result.get('num_received')} "
+          f"num_invalid_entries={meta_result.get('num_invalid_entries')}")
+
+    workflow_id = ""
+    editor_url = ""
+    if not args.skip_workflow:
+        print(f"[3/3] Duplicando workflow n8n base ({WORKFLOW_BASE_ID})...")
+        wf_name = (
+            f"[Auto-Sync] Clint Tag → Meta Audience: {args.audience_name}"
+        )
+        workflow_id, editor_url = n8n_duplicate_workflow(
+            env, wf_name, tag_id, tag_name, audience_id, args.audience_name,
+        )
+        print(f"      workflow ATIVO id={workflow_id}")
+        print(f"      {editor_url}")
+
+    folder_name = f"{datetime.now().strftime('%d-%m-%Y')}_publico_{slugify(args.audience_name)[:60]}"
+    folder = VAULT_TAREFAS / folder_name
+    print(f"[3/3] Salvando docs em {folder.name}/")
+    write_vault_docs(
+        folder,
+        tag_name=tag_name,
+        tag_id=tag_id,
+        ad_account=args.ad_account,
+        audience_id=audience_id,
+        audience_name=args.audience_name,
+        workflow_id=workflow_id,
+        editor_url=editor_url,
+        stats=dict(stats),
+        meta_result=meta_result,
+    )
+
+    print()
+    print("=" * 60)
+    print("PIPELINE CONCLUIDO")
+    print("=" * 60)
+    print(f"  Audience: {args.audience_name}")
+    print(f"  ID:       {audience_id}")
+    print(f"  Tag:      {tag_name} (id {tag_id})")
+    print(f"  Upload:   {len(records):,} contatos / Meta recv {meta_result.get('num_received')}")
+    if workflow_id:
+        print(f"  Workflow: {workflow_id}")
+        print(f"  Editor:   {editor_url}")
+    print(f"  Vault:    {folder}")
+
+
+if __name__ == "__main__":
+    main()
+

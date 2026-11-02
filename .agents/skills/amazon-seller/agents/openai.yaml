@@ -1,0 +1,4 @@
+interface:
+  display_name: "Amazon Seller"
+  short_description: "Operação e integrações Amazon Seller"
+  default_prompt: "Use $amazon-seller para planejar uma operação ou integração SP-API."

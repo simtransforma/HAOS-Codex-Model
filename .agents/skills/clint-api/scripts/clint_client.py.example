@@ -1,0 +1,527 @@
+#!/usr/bin/env python3
+"""
+ClintClient, biblioteca Python pra API do Clint CRM (api.clint.digital/v1).
+
+Encapsula auth, paginação, retry e os bugs/pegadinhas conhecidos.
+
+Uso típico:
+
+    from clint_client import ClintClient
+
+    c = ClintClient.from_master_env()
+    tag = c.find_tag_by_name("example-tag")
+    contacts = c.list_contacts_by_tag(tag["id"])
+    print(f"{len(contacts)} contatos")
+
+Contrato de exemplo a verificar no ambiente autorizado; nenhuma execucao real e alegada.
+"""
+from __future__ import annotations
+
+import json
+import os
+import re
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+from typing import Any, Iterator
+
+API_BASE = "https://api.clint.digital/v1"
+DEFAULT_LIMIT = 100  # max suportado pela API
+DEFAULT_TIMEOUT = 30
+MAX_RETRIES = 3
+RETRY_BACKOFF_BASE = 0.5  # s
+PAGE_SLEEP = 0.15  # s entre paginas (rate-limit gentle)
+
+
+class ClintAPIError(Exception):
+    """Erro estruturado da API Clint."""
+
+    def __init__(self, status: int, body: str, url: str):
+        self.status = status
+        self.body = body
+        self.url = url
+        super().__init__(f"Clint API {status} on {url}: {body[:200]}")
+
+
+class ClintClient:
+    """Cliente da API REST do Clint CRM.
+
+    Importante (comportamentos a testar em fixtures da versao usada):
+    - Param `?search=` em /tags NÃO filtra (retorna 100 quaisquer)
+    - PII de contato fica em `c["fields"]["cep"|"doc"|"sobrenome"|"cidade"|"estado"]`
+    - Telefone canônico é `c["fullPhone"]` (não `phone` nem `complete_phone`)
+    - Não tem `created_after` em /contacts (polling diff via walk reverso)
+    - Update de contato/deal = POST /{recurso}/{id} (PUT/PATCH dão 404)
+    - POST /deals IGNORA `fields` → custom field só grava via POST /contacts/{id}
+    - Add tag = POST /contacts/{id}/tags com body = array de strings ["uuid"]
+    - Marcar ganho = POST /deals/{id} {"status":"WON"}
+    - POST /deals não é idempotente (2 POST = 2 deals) → find_deal_by_contact antes
+    """
+
+    def __init__(self, token: str, base_url: str = API_BASE):
+        self.token = token
+        self.base_url = base_url.rstrip("/")
+        self._session_headers = {
+            "api-token": token,
+            "accept": "application/json",
+        }
+
+    # ===== Bootstrap =====
+    @classmethod
+    def from_master_env(
+        cls,
+        master_env_path: str | Path | None = None,
+        token_var_candidates: list[str] | None = None,
+    ) -> "ClintClient":
+        """Lê token do MASTER.env (caminho padrão HAOS) e instancia."""
+        if master_env_path is None:
+            master_env_path = r"${HAOS_PRIVATE_ROOT}"
+        path = Path(master_env_path)
+        if not path.exists():
+            raise FileNotFoundError(f"MASTER.env não encontrado: {path}")
+        env = {}
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                env[k.strip()] = v.strip().strip('"').strip("'")
+        # Ordem de exemplo; configurar aliases conforme o contrato do usuario.
+        # Nenhuma configuracao ou validacao de cliente e fornecida.
+        candidates = token_var_candidates or [
+            "CLINT_API_KEY", "CLINT_API_TOKEN", "CLINT_TOKEN",
+        ]
+        for var in candidates:
+            if env.get(var):
+                return cls(token=env[var])
+        raise KeyError(
+            f"Token Clint não encontrado em {path}. "
+            f"Esperado uma de: {candidates}"
+        )
+
+    # ===== HTTP plumbing =====
+    def _build_url(self, path: str, params: dict | None = None) -> str:
+        if not path.startswith("/"):
+            path = "/" + path
+        url = f"{self.base_url}{path}"
+        if params:
+            # remove None values
+            clean = {k: v for k, v in params.items() if v is not None}
+            if clean:
+                url += "?" + urllib.parse.urlencode(clean, doseq=True)
+        return url
+
+    def _request(
+        self,
+        method: str,
+        path: str,
+        params: dict | None = None,
+        body: dict | None = None,
+        timeout: int = DEFAULT_TIMEOUT,
+    ) -> dict:
+        url = self._build_url(path, params)
+        for attempt in range(MAX_RETRIES):
+            try:
+                req = urllib.request.Request(
+                    url, method=method, headers=self._session_headers,
+                )
+                data = None
+                if body is not None:
+                    req.add_header("Content-Type", "application/json")
+                    data = json.dumps(body).encode("utf-8")
+                with urllib.request.urlopen(req, data=data, timeout=timeout) as r:
+                    raw = r.read().decode("utf-8")
+                    return json.loads(raw) if raw else {}
+            except urllib.error.HTTPError as e:
+                body_str = ""
+                try:
+                    body_str = e.read().decode("utf-8")
+                except Exception:
+                    pass
+                # 5xx → retry; 4xx → raise
+                if 500 <= e.code < 600 and attempt < MAX_RETRIES - 1:
+                    time.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                    continue
+                raise ClintAPIError(e.code, body_str, url) from e
+            except (urllib.error.URLError, TimeoutError) as e:
+                if attempt < MAX_RETRIES - 1:
+                    time.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                    continue
+                raise
+
+    def get(self, path: str, params: dict | None = None) -> dict:
+        return self._request("GET", path, params=params)
+
+    def post(self, path: str, body: dict) -> dict:
+        return self._request("POST", path, body=body)
+
+    def put(self, path: str, body: dict) -> dict:
+        return self._request("PUT", path, body=body)
+
+    def delete(self, path: str) -> dict:
+        return self._request("DELETE", path)
+
+    # ===== Paginação genérica =====
+    def paginate(
+        self,
+        path: str,
+        params: dict | None = None,
+        limit: int = DEFAULT_LIMIT,
+        max_pages: int | None = None,
+    ) -> Iterator[dict]:
+        """Itera itens de qualquer endpoint paginado.
+
+        Quebra quando `len(items) < limit` (última página) ou `hasNext == False`.
+        Sleep curto entre páginas (rate-limit gentle).
+        """
+        page = 1
+        params = dict(params or {})
+        params["limit"] = limit
+        while True:
+            params["page"] = page
+            r = self.get(path, params=params)
+            items = r.get("data") or r.get("items") or []
+            if not items:
+                return
+            for it in items:
+                yield it
+            has_next = bool(r.get("hasNext") or r.get("has_next") or r.get("next"))
+            if not has_next and len(items) < limit:
+                return
+            if max_pages and page >= max_pages:
+                return
+            page += 1
+            time.sleep(PAGE_SLEEP)
+
+    def paginate_all(
+        self, path: str, params: dict | None = None, limit: int = DEFAULT_LIMIT,
+    ) -> list[dict]:
+        return list(self.paginate(path, params=params, limit=limit))
+
+    # ===== TAGS =====
+    def list_tags(self) -> list[dict]:
+        """Lista TODAS as tags (paginado)."""
+        return self.paginate_all("/tags")
+
+    def find_tag_by_name(self, name: str, case_sensitive: bool = True) -> dict | None:
+        """Encontra tag por nome exato.
+
+        BUG: `?search=name` da API não filtra de fato, retorna 100 quaisquer.
+        Solução: tenta search (rápido) e cai pra paginação completa se não casar.
+        """
+        # Tentativa 1: search (rápido se funcionar)
+        try:
+            r = self.get("/tags", params={
+                "search": name, "page": 1, "limit": DEFAULT_LIMIT,
+            })
+            for t in (r.get("data") or r.get("items") or []):
+                if self._tag_name_matches(t.get("name", ""), name, case_sensitive):
+                    return t
+        except ClintAPIError:
+            pass
+        # Tentativa 2: paginação completa
+        for t in self.paginate("/tags"):
+            if self._tag_name_matches(t.get("name", ""), name, case_sensitive):
+                return t
+        return None
+
+    @staticmethod
+    def _tag_name_matches(actual: str, expected: str, case_sensitive: bool) -> bool:
+        if case_sensitive:
+            return actual.strip() == expected.strip()
+        return actual.strip().lower() == expected.strip().lower()
+
+    # ===== CONTACTS =====
+    def list_contacts_by_tag(
+        self, tag_id: str, limit_per_page: int = DEFAULT_LIMIT,
+    ) -> list[dict]:
+        """Todos os contatos que têm a tag (paginado)."""
+        return self.paginate_all(
+            "/contacts", params={"tag_ids": tag_id}, limit=limit_per_page,
+        )
+
+    def iter_contacts_by_tag(self, tag_id: str) -> Iterator[dict]:
+        """Iterador (não carrega tudo em memória) de contatos da tag."""
+        yield from self.paginate("/contacts", params={"tag_ids": tag_id})
+
+    def get_contact(self, contact_id: str) -> dict:
+        return self.get(f"/contacts/{contact_id}")
+
+    def list_contacts(self, **filters) -> list[dict]:
+        """Lista contatos com filtros arbitrários (paginado)."""
+        return self.paginate_all("/contacts", params=filters)
+
+    def create_contact(self, payload: dict) -> dict:
+        """Cria novo contato. Payload conforme schema.md."""
+        return self.post("/contacts", body=payload)
+
+    def update_contact(self, contact_id: str, payload: dict) -> dict:
+        """Atualiza contato.
+
+        ⚠️ Update é via POST /contacts/{id} (NÃO PUT, PUT/PATCH dão 404,
+        validado 16-18/06/2026). Mantido por compat; redireciona pra POST.
+        Faz MERGE de `fields` (não sobrescreve campo já preenchido).
+        Prefira `update_contact_fields()` pra clareza de intenção.
+        """
+        return self.post(f"/contacts/{contact_id}", body=payload)
+
+    def update_contact_fields(self, contact_id: str, fields: dict) -> dict:
+        """Grava custom fields num contato (única rota que persiste `fields`).
+
+        POST /contacts/{id} com {"fields": {...}}. Faz MERGE: preenche campo
+        VAZIO, não sobrescreve preenchido (validado 18/06/2026, não-destrutivo).
+
+        ⚠️ Só persistem slugs JÁ registrados no painel do Clint, chave de slug
+        inexistente é descartada silenciosamente (silent-drop, status 201 normal).
+        ⚠️ POST /deals IGNORA `fields`, esta é a ÚNICA forma de gravar custom field.
+        """
+        return self.post(f"/contacts/{contact_id}", body={"fields": fields})
+
+    def add_tags_to_contact(self, contact_id: str, tag_ids: list[str]) -> dict:
+        """Adiciona uma OU MAIS tags a um contato.
+
+        ⚠️ O body é um ARRAY de strings de tag_id: ["uuid1", "uuid2"]
+        (NÃO {"tag_id": "uuid"}, dá 400 "Body must be an array of strings",
+        corrigido 18/06/2026).
+        """
+        if isinstance(tag_ids, str):
+            tag_ids = [tag_ids]
+        return self.post(f"/contacts/{contact_id}/tags", body=list(tag_ids))
+
+    def add_tag_to_contact(self, contact_id: str, tag_id: str) -> dict:
+        """Adiciona UMA tag (conveniência). Internamente usa o array correto."""
+        return self.add_tags_to_contact(contact_id, [tag_id])
+
+    def remove_tag_from_contact(self, contact_id: str, tag_id: str) -> dict:
+        return self.delete(f"/contacts/{contact_id}/tags/{tag_id}")
+
+    # ===== DEALS (Negócios) =====
+    def list_deals(self, **filters) -> list[dict]:
+        return self.paginate_all("/deals", params=filters)
+
+    def get_deal(self, deal_id: str) -> dict:
+        return self.get(f"/deals/{deal_id}")
+
+    def create_deal(
+        self,
+        origin_id: str,
+        email: str | None = None,
+        name: str | None = None,
+        phone: str | None = None,
+        value: float | None = None,
+        ddi: str | None = "55",
+        contact_id: str | None = None,
+        fields: dict | None = None,
+    ) -> dict:
+        """Cria deal numa origin, com upsert de contato embutido.
+
+        POST /deals faz upsert do CONTATO (match por email/telefone), não precisa
+        criar contato antes. Um dos params de contato é obrigatório
+        (contact_id OU email OU name OU phone).
+
+        ⚠️ NÃO é idempotente p/ deal (2 POST = 2 deals) → cheque
+        `find_deal_by_contact` antes se precisar dedupe.
+        ⚠️ O `fields` aqui é IGNORADO pela API (silent drop). Se passar `fields`,
+        este método grava-os DEPOIS, no contato, via update_contact_fields()
+        (única rota que persiste custom field). Cai no stage default da origin.
+        """
+        body: dict[str, Any] = {"origin_id": origin_id}
+        if contact_id:
+            body["contact_id"] = contact_id
+        if email:
+            body["email"] = email
+        if name:
+            body["name"] = name
+        if phone:
+            body["phone"] = phone
+            if ddi:
+                body["ddi"] = ddi
+        if value is not None:
+            body["value"] = value
+        deal = self.post("/deals", body=body)
+        # POST /deals ignora fields → gravar no contato como passo separado
+        if fields:
+            cid = contact_id or (deal.get("data") or {}).get("contact_id")
+            if cid:
+                self.update_contact_fields(cid, fields)
+        return deal
+
+    def update_deal(self, deal_id: str, payload: dict) -> dict:
+        """Atualiza deal. POST /deals/{id} (NÃO PUT/PATCH → 404)."""
+        return self.post(f"/deals/{deal_id}", body=payload)
+
+    def mark_deal_won(self, deal_id: str) -> dict:
+        """Marca deal como GANHO. POST /deals/{id} {"status":"WON"} → seta won_at."""
+        return self.update_deal(deal_id, {"status": "WON"})
+
+    def list_deals_by_contact(self, contact_id: str) -> list[dict]:
+        """Deals de um contato. ?contact_id= FILTRA de verdade (validado)."""
+        return self.paginate_all("/deals", params={"contact_id": contact_id})
+
+    def find_deal_by_contact(
+        self, contact_id: str, origin_id: str | None = None,
+    ) -> dict | None:
+        """Acha o 1º deal do contato (opcionalmente filtrando por origin).
+
+        ⚠️ `?origin=` NÃO filtra na API → filtramos origin_id no código.
+        Use pra dedupe antes de create_deal (POST /deals não é idempotente).
+        Retorna o deal (dict) ou None.
+        """
+        deals = self.list_deals_by_contact(contact_id)
+        if origin_id is None:
+            return deals[0] if deals else None
+        for d in deals:
+            if d.get("origin_id") == origin_id:
+                return d
+        return None
+
+    # ===== PIPELINES =====
+    def list_pipelines(self) -> list[dict]:
+        return self.paginate_all("/pipelines")
+
+    def list_stages(self, pipeline_id: str) -> list[dict]:
+        return self.paginate_all(f"/pipelines/{pipeline_id}/stages")
+
+    # ===== ORGANIZATIONS =====
+    def list_organizations(self, **filters) -> list[dict]:
+        return self.paginate_all("/organizations", params=filters)
+
+    def get_organization(self, org_id: str) -> dict:
+        return self.get(f"/organizations/{org_id}")
+
+
+# ===== Normalização de Contact (PII spread) =====
+EMAIL_RE = re.compile(r"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$")
+DIGITS_RE = re.compile(r"\d+")
+
+STATE_MAP = {
+    "sao paulo": "sp", "são paulo": "sp", "sp": "sp",
+    "rio de janeiro": "rj", "rj": "rj",
+    "minas gerais": "mg", "mg": "mg",
+    "rio grande do sul": "rs", "rs": "rs",
+    "parana": "pr", "paraná": "pr", "pr": "pr",
+    "santa catarina": "sc", "sc": "sc",
+    "bahia": "ba", "ba": "ba",
+    "ceara": "ce", "ceará": "ce", "ce": "ce",
+    "distrito federal": "df", "df": "df",
+    "goias": "go", "goiás": "go", "go": "go",
+    "pernambuco": "pe", "pe": "pe",
+    "espirito santo": "es", "espírito santo": "es", "es": "es",
+    "amazonas": "am", "am": "am",
+    "mato grosso": "mt", "mt": "mt",
+    "mato grosso do sul": "ms", "ms": "ms",
+    "para": "pa", "pará": "pa", "pa": "pa",
+    "maranhao": "ma", "maranhão": "ma", "ma": "ma",
+    "paraiba": "pb", "paraíba": "pb", "pb": "pb",
+    "piaui": "pi", "piauí": "pi", "pi": "pi",
+    "rio grande do norte": "rn", "rn": "rn",
+    "alagoas": "al", "al": "al",
+    "sergipe": "se", "se": "se",
+    "rondonia": "ro", "rondônia": "ro", "ro": "ro",
+    "tocantins": "to", "to": "to",
+    "acre": "ac", "ac": "ac",
+    "amapa": "ap", "amapá": "ap", "ap": "ap",
+    "roraima": "rr", "rr": "rr",
+}
+
+
+def only_digits(s: str | None) -> str:
+    return "".join(DIGITS_RE.findall(s or ""))
+
+
+def normalize_contact(contact: dict) -> dict:
+    """Recebe contato cru do Clint, devolve dict normalizado.
+
+    Resolve as 4 pegadinhas conhecidas:
+    - PII em `fields.*` (não no raiz)
+    - Telefone canônico = `fullPhone`
+    - Estado pode vir como nome longo → UF de 2 letras
+    - Sobrenome pode estar em `fields.sobrenome` ou faltando
+
+    Schema de saída (multi-key pra hash SHA-256 estilo Meta Ads):
+        email, phone (E.164), fn, ln, zip (8 dig), ct, st (2 letras),
+        country='br', extern_id (CPF 11 dig)
+
+    Retorna None se contato não tem nem email NEM phone válidos.
+    """
+    c = contact
+    fields = c.get("fields") or {}
+    org_fields = (c.get("organization") or {}).get("fields") or {}
+
+    email = (c.get("email") or "").strip().lower()
+    phone = only_digits(
+        c.get("fullPhone") or c.get("complete_phone") or c.get("phone") or ""
+    )
+    if phone and len(phone) in (10, 11):
+        phone = "55" + phone
+    elif phone and phone.startswith("55") and 12 <= len(phone) <= 13:
+        pass
+    elif phone:
+        phone = ""
+
+
+    name = (c.get("name") or "").strip()
+    sob = (fields.get("sobrenome") or c.get("sobrenome") or "").strip()
+    cep = only_digits(fields.get("cep") or c.get("cep") or "")
+    cep = cep if len(cep) == 8 else ""
+
+    em_ok = bool(EMAIL_RE.match(email))
+    ph_ok = bool(phone and len(phone) in (12, 13))
+
+    if not (em_ok or ph_ok):
+        return None  # descarta
+
+    parts = name.split() if name else []
+    fn = parts[0].lower() if parts else ""
+    if sob:
+        ln = sob.split()[0].lower()
+    elif len(parts) > 1:
+        ln = parts[-1].lower()
+    else:
+        ln = ""
+
+    cidade = (fields.get("cidade") or c.get("cidade") or "").strip().lower()
+    estado_raw = (
+        fields.get("estado") or org_fields.get("state")
+        or c.get("estado") or ""
+    ).strip().lower()
+    estado = STATE_MAP.get(estado_raw, "")
+
+    return {
+        "email": email if em_ok else "",
+        "phone": phone if ph_ok else "",
+        "fn": fn,
+        "ln": ln,
+        "zip": cep,
+        "ct": cidade,
+        "st": estado,
+        "country": "br",
+        "extern_id": cpf,
+    }
+
+
+# ===== Util de debug =====
+def mask_pii(s: str) -> str:
+    """Mascara email/phone/CPF pra log seguro."""
+    if not s:
+        return s
+    if "@" in s:
+        local, _, domain = s.partition("@")
+        return f"{local[:3]}***@{domain}"
+    digits = only_digits(s)
+    if len(digits) >= 4:
+        return f"{digits[:3]}***{digits[-2:]}"
+    return "***"
+
+
+if __name__ == "__main__":
+    # Smoke test (não envia nada destrutivo)
+    c = ClintClient.from_master_env()
+    tags = c.list_tags()
+    print(f"Total tags: {len(tags)}")
+    if tags:
+        print(f"Primeira tag: {tags[0].get('name')} ({tags[0].get('id')})")
+

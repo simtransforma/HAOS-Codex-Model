@@ -9,8 +9,9 @@ instalador automatico ou distribuicao do Superpowers upstream.
 
 Leia [AGENTS.md](AGENTS.md) e [INSTALL.md](INSTALL.md) antes de copiar arquivos.
 O [prompt de instalacao](PROMPT_INSTALACAO.md) delimita uma instalacao local
-conservadora. Uma interface de chat ou GPT Work sem filesystem e ferramentas
-locais nao instala este modelo: pode analisar o material e preparar um plano.
+conservadora por capacidades. WORK/cloud pode oferecer workspace executavel
+sem Windows local. Sem filesystem, conectores/APIs podem carregar conteudo
+pertinente; isso nao comprova instalacao global nem persistencia.
 
 O caminho de descoberta de skills e agentes varia conforme runtime, versao,
 camadas de configuracao e confianca do projeto. Versoes recentes do Codex tambem
@@ -37,10 +38,15 @@ Veja fontes oficiais e procedimento no [INSTALL.md](INSTALL.md).
 
 ## Validacao local
 
-Na raiz deste checkout, com Python 3.11 ou superior e sem dependencias externas:
+Na raiz deste checkout, com Python 3.11+ e PyYAML 6.x ja disponiveis:
+
+A dependencia de validacao esta fixada em [requirements-validator.txt](requirements-validator.txt)
+(PyYAML 6.0.3). O CI instala esse arquivo no ambiente isolado do job; nenhuma
+instalacao global no computador e necessaria ou implicada.
 
 ```sh
 python -B scripts/validate_model.py
+python -B scripts/model_routing.py
 python -B -m unittest discover -s tests -v
 ```
 
@@ -48,6 +54,21 @@ O validador confere estrutura, referencias locais, matriz e candidatos sensiveis
 a suite testa esse comportamento. Isso nao comprova modelo efetivo, instalacao,
 skills executadas, delegacao, hooks ou integracoes em funcionamento. O aceite
 do runtime tem checks separados no [INSTALL.md](INSTALL.md).
+
+## Catalogo completo e direitos
+
+O pacote transporta 193 pastas de origem com procedimentos reais e recursos
+portaveis, preservando os 29 metodos publicos anteriores. A uniao possui
+207 skills: as 193 origens e 14 metodos adicionais. A [cobertura](playbooks/capabilities.md) aponta para inventario,
+hashes, corpos portados, dependencias e motivos concretos de omissoes.
+Os 34 agentes recebem skills por especialidade, nao todas para todos.
+Consulte o [indice compacto](docs/skill-index.json) e leia apenas procedimentos
+selecionados. O catalogo de proveniencia e para CI/QA, nao para carregar em
+WORK a cada sessao. Busca local: `python -B scripts/model_routing.py --search tema`.
+
+MIT da raiz cobre somente contribuicoes originais do modelo. Imports mantem
+autoria e termos proprios; licenca desconhecida nao e licenca permissiva nem
+exclusao automatica. Veja [avisos](docs/THIRD_PARTY_NOTICES.md).
 
 ## Operacao
 

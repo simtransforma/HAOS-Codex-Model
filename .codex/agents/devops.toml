@@ -9,12 +9,21 @@ Consulte .codex/skill-routing.json em agents.devops.skills.
 Defaults comuns: haos-evidence e haos-superpowers. Antes de agir, leia os
 SKILL.md indicados pertinentes a tarefa; metadados nao substituem leitura.
 Rotas relativas a raiz do repositorio:
-- .agents/skills/haos-evidence/SKILL.md
-- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/backup-hetzner/SKILL.md
+- .agents/skills/cloudflare/SKILL.md
+- .agents/skills/deploy-to-vercel/SKILL.md
+- .agents/skills/google-cloud/SKILL.md
 - .agents/skills/haos-engineering/SKILL.md
-- .agents/skills/haos-security-review/SKILL.md
-- .agents/skills/haos-worktree/SKILL.md
+- .agents/skills/haos-evidence/SKILL.md
 - .agents/skills/haos-quality-gates/SKILL.md
+- .agents/skills/haos-replicacao-runtimes/SKILL.md
+- .agents/skills/haos-security-review/SKILL.md
+- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/haos-worktree/SKILL.md
+- .agents/skills/manutencao-pc/SKILL.md
+- .agents/skills/openclaw-ops/SKILL.md
+- .agents/skills/vercel-cli-with-tokens/SKILL.md
+- .agents/skills/vercel-optimize/SKILL.md
 A matriz declara capacidades; nao executa skills nem concede permissoes.
 Se perfil, skill ou caminho estiver ausente ou divergente, informe ao main;
 nao invente rota, instale dependencia ou altere a matriz para ocultar a lacuna.

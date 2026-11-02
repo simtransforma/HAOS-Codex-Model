@@ -9,12 +9,35 @@ Consulte .codex/skill-routing.json em agents.project-manager.skills.
 Defaults comuns: haos-evidence e haos-superpowers. Antes de agir, leia os
 SKILL.md indicados pertinentes a tarefa; metadados nao substituem leitura.
 Rotas relativas a raiz do repositorio:
+- .agents/skills/claude-handoff-to-codex/SKILL.md
+- .agents/skills/find-skills/SKILL.md
+- .agents/skills/haos-catalog-integrity/SKILL.md
+- .agents/skills/haos-caveman-compression/SKILL.md
+- .agents/skills/haos-chrome-devtools-mcp/SKILL.md
+- .agents/skills/haos-company-trust-audit/SKILL.md
+- .agents/skills/haos-context7-docs/SKILL.md
 - .agents/skills/haos-evidence/SKILL.md
-- .agents/skills/haos-superpowers/SKILL.md
 - .agents/skills/haos-execution-waves/SKILL.md
-- .agents/skills/haos-task-loop/SKILL.md
+- .agents/skills/haos-external-approval/SKILL.md
+- .agents/skills/haos-find-skills/SKILL.md
+- .agents/skills/haos-forja-agente/SKILL.md
+- .agents/skills/haos-graphify-code-map/SKILL.md
+- .agents/skills/haos-otimizacao-master/SKILL.md
+- .agents/skills/haos-project-sanitation/SKILL.md
+- .agents/skills/haos-radar-semanal/SKILL.md
 - .agents/skills/haos-session-handoff/SKILL.md
 - .agents/skills/haos-squad/SKILL.md
+- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/haos-task-loop/SKILL.md
+- .agents/skills/incorporador/SKILL.md
+- .agents/skills/long-running-agent/SKILL.md
+- .agents/skills/lovable-session-ops/SKILL.md
+- .agents/skills/project-artifact-governance/SKILL.md
+- .agents/skills/session-full-dump/SKILL.md
+- .agents/skills/session-handoff/SKILL.md
+- .agents/skills/skill-creator/SKILL.md
+- .agents/skills/sprint-context-generator/SKILL.md
+- .agents/skills/token-optimizer/SKILL.md
 A matriz declara capacidades; nao executa skills nem concede permissoes.
 Se perfil, skill ou caminho estiver ausente ou divergente, informe ao main;
 nao invente rota, instale dependencia ou altere a matriz para ocultar a lacuna.

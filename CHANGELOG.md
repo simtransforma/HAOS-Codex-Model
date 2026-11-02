@@ -35,3 +35,11 @@
 
 Estas notas descrevem documentos locais. Nao comprovam instalacao, ativacao,
 teste operacional, commit, push ou publicacao remota desta atualizacao.
+# Export integral - 2026-11-02
+
+- Cobertura das 193 origens com procedimentos reais e recursos de suporte,
+  preservando os 29 metodos publicos anteriores e especialidades de 34 agentes.
+- Catalogo consolidado de proveniencia, hashes, corpos e dependencias.
+- YAML seguro, parsing Python/JSON e gates de privacidade/links mantidos.
+- Prompt WORK/cloud por capacidades, sem instalacao global ficticia.
+- MIT limitada ao material original; imports mantem autoria e termos proprios.

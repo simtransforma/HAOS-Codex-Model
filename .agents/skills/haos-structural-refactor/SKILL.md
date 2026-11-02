@@ -75,3 +75,8 @@ cobertura. Nao chame check estatico de teste comportamental.
 - Pedido apenas de auditoria: produzir parecer na resposta, sem criar indice ou arquivo.
 - APPLY amplo sem gate: preparar plano e baseline; aguardar aprovacao dependente.
 - Teste de contrato regride: interromper incremento e corrigir com evidencia.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

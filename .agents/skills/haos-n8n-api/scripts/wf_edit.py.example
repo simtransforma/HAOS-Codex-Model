@@ -1,0 +1,229 @@
+#!/usr/bin/env python3
+"""
+wf_edit.py, helper pra editar workflows do n8n da HAOS via Public API.
+
+Resolve as 2 pegadinhas do PUT /workflows/{id}:
+  1. Salva backup do JSON ANTES de qualquer alteração.
+  2. Remove os campos read-only que a Public API recusa no PUT.
+
+Uso típico (no seu script):
+
+    from wf_edit import ${RESOURCE_ID}
+
+    n = ${RESOURCE_ID}.from_master_env()
+    wf = n.get_workflow("${RESOURCE_ID}")          # GET + backup automático
+    # ... edite wf["nodes"] / wf["connections"] à vontade ...
+    n.update_workflow("${RESOURCE_ID}", wf)        # sanitiza + PUT
+    n.activate("${RESOURCE_ID}")                   # ativar é endpoint separado
+
+Padrões validados em produção (FPV369 / Yampi / certificado) 05-18/06/2026.
+NUNCA hardcode token, lê do MASTER.env (N8N_API_KEY / N8N_API_URL).
+"""
+from __future__ import annotations
+
+import json
+import os
+import re
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+DEFAULT_TIMEOUT = 60
+MAX_RETRIES = 3
+RETRY_BACKOFF_BASE = 0.5
+
+# Campos read-only que o PUT /workflows/{id} recusa (must NOT have additional properties).
+WF_READONLY_TOP = (
+    "id", "active", "createdAt", "updatedAt", "tags", "versionId",
+    "triggerCount", "shared", "meta", "pinData", "homeProject",
+    "sharedWithProjects", "isArchived", "scopes", "usedCredentials",
+)
+# Mantemos executionOrder; só removemos estes de settings se o n8n recusar.
+SETTINGS_MAYBE_READONLY = ("binaryMode", "availableInMCP")
+
+# Backup e cofre fora do repositório público.
+DEFAULT_BACKUP_DIR = r"${HAOS_PRIVATE_ROOT}"
+DEFAULT_MASTER_ENV = r"${HAOS_PRIVATE_ROOT}"
+
+
+class ${RESOURCE_ID}(Exception):
+    def __init__(self, status: int, body: str, url: str):
+        self.status, self.body, self.url = status, body, url
+        super().__init__(f"n8n API {status} on {url}: {body[:300]}")
+
+
+def _slugify(name: str) -> str:
+    s = re.sub(r"[^\w\-]+", "_", (name or "wf").strip().lower())
+    return s.strip("_")[:40] or "wf"
+
+
+class ${RESOURCE_ID}:
+    def __init__(self, base_url: str, api_key: str,
+                 backup_dir: str | Path = DEFAULT_BACKUP_DIR):
+        self.base_url = base_url.rstrip("/")
+        self.api_key = api_key
+        self.backup_dir = Path(backup_dir)
+        self.headers = {"X-N8N-API-KEY": api_key, "accept": "application/json"}
+
+    # ----- bootstrap -----
+    @classmethod
+    def from_master_env(cls, master_env_path: str | Path | None = None) -> "${RESOURCE_ID}":
+        path = Path(master_env_path or DEFAULT_MASTER_ENV)
+        if not path.exists():
+            raise FileNotFoundError(f"MASTER.env não encontrado: {path}")
+        env: dict[str, str] = {}
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                env[k.strip()] = v.strip().strip('"').strip("'")
+        api_key = env.get("N8N_API_KEY") or env.get("N8N_API_TOKEN")
+        base = env.get("N8N_API_URL") or "https://service.example.invalid"
+        if not api_key:
+            raise KeyError("N8N_API_KEY não encontrado no MASTER.env")
+        return cls(base_url=base, api_key=api_key)
+
+    # ----- HTTP -----
+    def _request(self, method: str, path: str, body: dict | None = None,
+                 params: dict | None = None, timeout: int = DEFAULT_TIMEOUT) -> dict:
+        if not path.startswith("/"):
+            path = "/" + path
+        url = f"{self.base_url}{path}"
+        if params:
+            clean = {k: v for k, v in params.items() if v is not None}
+            if clean:
+                url += "?" + urllib.parse.urlencode(clean, doseq=True)
+        for attempt in range(MAX_RETRIES):
+            try:
+                req = urllib.request.Request(url, method=method, headers=dict(self.headers))
+                data = None
+                if body is not None:
+                    req.add_header("Content-Type", "application/json")
+                    data = json.dumps(body).encode("utf-8")
+                with urllib.request.urlopen(req, data=data, timeout=timeout) as r:
+                    raw = r.read().decode("utf-8")
+                    return json.loads(raw) if raw else {}
+            except urllib.error.HTTPError as e:
+                bs = ""
+                try:
+                    bs = e.read().decode("utf-8")
+                except Exception:
+                    pass
+                if 500 <= e.code < 600 and attempt < MAX_RETRIES - 1:
+                    time.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                    continue
+                raise ${RESOURCE_ID}(e.code, bs, url) from e
+            except (urllib.error.URLError, TimeoutError):
+                if attempt < MAX_RETRIES - 1:
+                    time.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                    continue
+                raise
+
+    def get(self, path: str, params: dict | None = None) -> dict:
+        return self._request("GET", path, params=params)
+
+    def post(self, path: str, body: dict | None = None) -> dict:
+        return self._request("POST", path, body=body or {})
+
+    def put(self, path: str, body: dict) -> dict:
+        return self._request("PUT", path, body=body)
+
+    def delete(self, path: str) -> dict:
+        return self._request("DELETE", path)
+
+    # ----- workflows -----
+    def list_workflows(self, active: bool | None = None, limit: int = 100) -> list[dict]:
+        out: list[dict] = []
+        cursor = None
+        while True:
+            params: dict[str, Any] = {"limit": limit}
+            if active is not None:
+                params["active"] = "true" if active else "false"
+            if cursor:
+                params["cursor"] = cursor
+            r = self.get("/api/v1/workflows", params=params)
+            out.extend(r.get("data") or [])
+            cursor = r.get("nextCursor")
+            if not cursor:
+                break
+            time.sleep(0.1)
+        return out
+
+    def get_workflow(self, wf_id: str, backup: bool = True) -> dict:
+        """GET o workflow completo. Salva backup do JSON por padrão."""
+        wf = self.get(f"/api/v1/workflows/{wf_id}")
+        wf = wf.get("data", wf)  # algumas versões envelopam em data
+        if backup:
+            self.backup_workflow(wf, wf_id)
+        return wf
+
+    def backup_workflow(self, wf: dict, wf_id: str) -> Path:
+        self.backup_dir.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now().strftime("%Y-%m-%d_%H%M")
+        slug = _slugify(wf.get("name", ""))
+        dest = self.backup_dir / f"wf_{slug}_{wf_id}_{stamp}.json"
+        dest.write_text(json.dumps(wf, ensure_ascii=False, indent=2), encoding="utf-8")
+        return dest
+
+    @staticmethod
+    def sanitize_for_put(wf: dict, drop_settings: tuple[str, ...] = ()) -> dict:
+        """Remove campos read-only que a Public API recusa no PUT."""
+        body = {k: v for k, v in wf.items() if k not in WF_READONLY_TOP}
+        settings = dict(body.get("settings") or {})
+        settings.setdefault("executionOrder", "v1")  # preservar
+        for k in drop_settings:
+            settings.pop(k, None)
+        body["settings"] = settings
+        # PUT só aceita estes (staticData opcional):
+        allowed = {"name", "nodes", "connections", "settings", "staticData"}
+        return {k: v for k, v in body.items() if k in allowed}
+
+    def update_workflow(self, wf_id: str, wf: dict) -> dict:
+        """Sanitiza e faz PUT. Se a API reclamar de settings, retenta sem eles."""
+        try:
+            return self.put(f"/api/v1/workflows/{wf_id}", self.sanitize_for_put(wf))
+        except ${RESOURCE_ID} as e:
+            if "additional properties" in e.body and "settings" in e.body:
+                # retry tirando os settings opcionais que algumas versões recusam
+                return self.put(
+                    f"/api/v1/workflows/{wf_id}",
+                    self.sanitize_for_put(wf, drop_settings=SETTINGS_MAYBE_READONLY),
+                )
+            raise
+
+    def activate(self, wf_id: str) -> dict:
+        return self.post(f"/api/v1/workflows/{wf_id}/activate")
+
+    def deactivate(self, wf_id: str) -> dict:
+        return self.post(f"/api/v1/workflows/{wf_id}/deactivate")
+
+    # ----- executions -----
+    def list_executions(self, status: str | None = None, workflow_id: str | None = None,
+                        limit: int = 50) -> list[dict]:
+        params: dict[str, Any] = {"limit": limit}
+        if status:
+            params["status"] = status
+        if workflow_id:
+            params["workflowId"] = workflow_id
+        r = self.get("/api/v1/executions", params=params)
+        return r.get("data") or []
+
+    def stop_execution(self, exec_id: str) -> dict:
+        """Cancela no DB. ⚠️ pode não matar processo pendurado → docker restart n8n-worker."""
+        return self.post(f"/api/v1/executions/{exec_id}/stop")
+
+
+if __name__ == "__main__":
+    # Smoke test (read-only, não altera nada).
+    n = ${RESOURCE_ID}.from_master_env()
+    wfs = n.list_workflows()
+    print(f"Total workflows: {len(wfs)}")
+    for w in wfs[:5]:
+        print(f"  {w.get('id')}\t{w.get('active')}\t{w.get('name')}")
+

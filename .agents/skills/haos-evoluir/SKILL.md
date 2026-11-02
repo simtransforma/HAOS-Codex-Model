@@ -98,3 +98,8 @@ readback real, nao fila, health, resposta de escrita ou mera intencao.
 - Novidade valida em dry-run: apresentar proposta e SO_FECHA sem persistencia.
 - Escrita retorna timeout e prazo acabou: manter PENDENTE, consultar identidade
   e reconciliar antes de qualquer nova tentativa.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

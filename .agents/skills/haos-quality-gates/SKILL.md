@@ -78,3 +78,8 @@ declarar limite e verificar se outro procedimento prova o mesmo criterio.
 - Gate de tipos em documento puro: N/A com motivo; validar estrutura e texto.
 - Tres execucoes alternam sucesso/falha: registrar instabilidade e investigar,
   sem selecionar apenas o ultimo resultado favoravel.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

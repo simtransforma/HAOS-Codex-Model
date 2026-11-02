@@ -1,0 +1,173 @@
+# Portability, dependencies and provenance
+
+This is a sanitized source port, not proof that integrations work in your environment.
+No credentials, production resources, infrastructure configuration or historical cases are supplied.
+Imported material is not relicensed by the public repository license. Preserve original author and license notices.
+
+Files ending in .example are NONRUNNABLE SOURCE EXAMPLES: sanitization may change syntax and semantics. Do not rename and run blindly. Commands copied from the procedure that refer to missing helpers are not ready to execute.
+
+## Required Setup
+
+Configure endpoints, credentials and resource identifiers locally. Confirm tool availability and obtain authorization before external effects. Do not execute an unresolved command. Missing files are dependencies, not installed features.
+
+- Dependency reference/adapt.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/adapt.native.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/animate.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/audit.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/audit.native.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/bolder.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/clarify.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/colorize.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/craft-floor.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/craft.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/critique.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/delight.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/distill.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/doctor.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/document.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/extract.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/harden.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/hooks.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/init.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/layout.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/live.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/new-work.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/onboard.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/operate.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/optimize.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/overdrive.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/polish.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/quieter.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/routing.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/shape.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency reference/typeset.md -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency workspace/IDENTITY.md -> public-present. File present in the exported package; static presence is not execution verification.
+- Dependency RESOURCE_ID -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency [^"']+ -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency H -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency HERE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency HERO_REPRO -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency MOCKS_DIR -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency SPEC_PATH -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency STATE_PATH -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency W -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency GRID_PATH -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency API_BASE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency CARD_BASE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency .codex/hooks.json -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency IMPECCABLE_COMMAND -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency UPDATE_HOST -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency PRODUCT_SCHEMA_VERSION -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency KEYWORD -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency MIN_RANK_CAP_PX -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency scripts/lib/transformers/hooks.js -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency CLAUDE_PROJECT_DIR -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency ?:\+ -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency BLOCK_PREFIX -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency ?:dist|build|out|\.next|\.cache|coverage -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency [^'"]+\.(?:css|scss|sass|less) -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency DESIGN_STALE_NOTE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency EDIT_COUNT_THRESHOLD -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency ENVELOPE_PREFIX -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency HOOK_ADMIN_COMMAND -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency HOOK_IGNORE_MARKER_CLOSE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency HOOK_IGNORE_MARKER_OPEN -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency STEER_LINE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency url -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency DESIGN_PANEL_WIDTH -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency EASE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency FONT -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency MONO -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency PORT -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency TOKEN -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency USER_SECRET -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency A -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency S -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency docs/HARNESSES.md and opencode/packages/core/src/v1/config/command.ts -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency OPENCODE_PIN_MARKER -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency PIN_MARKER -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency PLAN_POINTER -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency SVELTE_COMPONENT_ROOT -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency SVELTE_PROBE_FILE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency SVELTE_RUNTIME_FILE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency SVELTE_LAYOUT_MARKER_CLOSE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency SVELTE_LAYOUT_MARKER_OPEN -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency TANSTACK_COMPONENT_BASENAME -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency TANSTACK_COMPONENT_DIR -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency TANSTACK_MARKER_CLOSE -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency TANSTACK_MARKER_OPEN -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency scripts/live-browser.js -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency LIVE_UI_PREFIX -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency ICON_ATTRS -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency NUXT_PLUGIN_MARKER -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency CSP_MARKER_ATTR -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency scripts/data/font-index.json -> bundled. File present in the exported package; static presence is not execution verification.
+- Dependency scripts/build-sub-pages.js -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency IMPECCABLE_COMMAND_PREFIX -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency CLAUDE_PLUGIN_ROOT -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency GROK_PLUGIN_ROOT -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency PLUGIN_ROOT -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency VAR -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency DESIGN_SIDECAR_SCHEMA_VERSION -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency SURFACE_BRIEF_VERSION -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency INTERPOLATION_SRC -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency QUOTED_STRING_SRC -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency scripts/build-browser-detector.js -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency BRAND_COLOR_HOVER -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency OUTLINE_COLOR -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency TYPE_HIERARCHY_MIN_STEP_RATIO -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency [^'"]+ -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency NAMED_COLOR_TOKENS -> user-config-required. Set locally outside the public repository; never put secrets or production identifiers in examples.
+- Dependency ?:[^>]*[^/] -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency \d+ -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency adapt.native.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency android.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency ios.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency audit.native.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency audit.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency live.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency new-work.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency init.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency animate.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency docs/spec.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency craft-floor.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency document.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency live-setup.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency degraded/documenter.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency degraded/finish-reviewer.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency shape.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency visualize.md -> missing. Not bundled. Supply and review this dependency locally before dependent commands; source presence does not count as delivery.
+- Dependency scripts/comp-diff.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/comp-spec.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/concept-seed.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/context-signals.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/embed-prompt.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/generate-image.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/live-browser.js -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/live-server.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/modern-screenshot.umd.js -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/palette.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/serve-question.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/live/manual-edit-routes.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/live/roots.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/live/source-lock.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/live/svelte-ast.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/live/svelte-component.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/live/sveltekit-adapter.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/lib/font-fingerprint.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/lib/image-metrics.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/lib/png.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/lib/raster.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/lib/staleness-deep.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/detector/detect-antipatterns-browser.js -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/detector/shared/color.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/detector/rules/checks.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/detector/node/file-system.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/detector/engines/visual/screenshot-contrast.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/detector/engines/static-html/detect-html.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/detector/engines/browser/detect-url.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+- Dependency scripts/detector/browser/injected/index.mjs -> nonrunnable-example. Only a sanitized .example is delivered. Review configuration and semantics, restore valid syntax, test in isolation and obtain authorization before use. Not a working helper.
+
+## Omitted Artifacts
+
+- node_modules: generated-or-dependency-cache

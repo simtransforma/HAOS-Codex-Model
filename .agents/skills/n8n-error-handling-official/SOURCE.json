@@ -1,0 +1,87 @@
+{
+  "repo": "n8n-io/skills",
+  "commit": "180b8415e3b73f78828cfa01e908e67f89f2a139",
+  "license": "Apache-2.0",
+  "path": "skills/n8n-error-handling-official",
+  "localAdaptation": "HAOS 2026-10-04; see ADAPTACAO-HAOS.md; upstream bodies include identified local corrections",
+  "upstreamFiles": [
+    {
+      "path": "LICENSE",
+      "gitBlob": "c87e50b21d7195576cfda86509960d9f80a1d3bd",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "skills/n8n-error-handling-official/SKILL.md",
+      "gitBlob": "a8eaa5db28f4ccdfefffaf175a01916ffcccf761",
+      "sha256": "7f81bbc5032f4229c818687447b75cab887f7abb479e76293e59b4e7b644038f"
+    },
+    {
+      "path": "skills/n8n-error-handling-official/references/API_WORKFLOWS.md",
+      "gitBlob": "986c8f2a2018edbbbbab56b1488ef3a506581838",
+      "sha256": "321bc896b4daee00c8ecccf1522d1400313065ddc327db60e65459c041ae305a"
+    },
+    {
+      "path": "skills/n8n-error-handling-official/references/ERROR_WORKFLOWS.md",
+      "gitBlob": "d8d345a54f79375ff67b62cc326d5e374377643d",
+      "sha256": "19e708e85fd2c9f736f21d583e1abd1ab49166f3c79a3c727a9b44918ffbd3a0"
+    },
+    {
+      "path": "skills/n8n-error-handling-official/references/NODE_ERROR_OUTPUTS.md",
+      "gitBlob": "050cf9fc6da4769adc81e51a65f28857138cabed",
+      "sha256": "0776bbed3098ae3c4ae1d3f0c4dc64aca60a7238359b4bd6c4d86182b4646cd7"
+    },
+    {
+      "path": "skills/n8n-error-handling-official/references/RESPONSE_SHAPES.md",
+      "gitBlob": "fa0e36b93bcec4363fcc2fc15f616b4440138ca5",
+      "sha256": "23c812ad0a3a1b4c6be626bc4b74f07dd452fd22e6f4997c1e7af0293a9e2444"
+    },
+    {
+      "path": "skills/n8n-error-handling-official/references/examples/validation-subworkflow-usage.ts",
+      "gitBlob": "ff3a8a0b318de6940a3411038df750ee1c59624c",
+      "sha256": "aa6906508e685d143e4f63d4c4acab6ae277b49c2c1d825276f133c5b1ddd50d"
+    },
+    {
+      "path": "skills/n8n-error-handling-official/references/examples/validation-subworkflow.ts",
+      "gitBlob": "815887197a5148514fd9a60d80944942b1e6b2a0",
+      "sha256": "8f8fbcc22288aa37269f7df589e8c0cb4f6eb8db4ca99bccdcf836030b484e44"
+    }
+  ],
+  "installedFiles": [
+    {
+      "path": "ADAPTACAO-HAOS.md",
+      "sha256": "fa224947236ecbd30cf2c39618ada3bc14690df78bb5607ee9caf4b9aa9b16f1"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "references/API_WORKFLOWS.md",
+      "sha256": "624e48eaa59f7fe9b39eabdc69f36d4eeebce54bc191724eebd81707ffc228d5"
+    },
+    {
+      "path": "references/ERROR_WORKFLOWS.md",
+      "sha256": "c9260bd018a1386a403a06a1952e57bf23bfc6105740fadb8592b87f55acd2b1"
+    },
+    {
+      "path": "references/examples/validation-subworkflow-usage.ts",
+      "sha256": "7c870274e8a4a435379dac152caafc71e97d33fe5bd82be43934a05d4de26b79"
+    },
+    {
+      "path": "references/examples/validation-subworkflow.ts",
+      "sha256": "221f2040bd18b467da1d743e0fffabf008457095e6963b8c29f865627bc93901"
+    },
+    {
+      "path": "references/NODE_ERROR_OUTPUTS.md",
+      "sha256": "0cd41b5e48d12ce7023cee37c470d5241119859a24606e579bfaa6cd29697748"
+    },
+    {
+      "path": "references/RESPONSE_SHAPES.md",
+      "sha256": "38030733e4d6537823b4e8401662c13ff476c9a86822fd0f7f505295a7430c78"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "e9e5b939d9f9571a90d725c9f91ffcab19434031fdf213cee91d0f0915c31b44"
+    }
+  ]
+}

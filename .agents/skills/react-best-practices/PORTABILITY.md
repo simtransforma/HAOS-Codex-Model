@@ -1,0 +1,49 @@
+# Portability and dependency contract
+
+Status: `adapted_private_config`. Original entry SHA-256: `1c2923f0e5c4dc808abb48cc4eea2bb402ec27631ac8392f4f2c5ecefdc6f483`.
+
+This is source transport, not proof of working credentials, live services, current APIs or installed MCPs. Set USER_WORKSPACE_ROOT, USER_TOOLS_ROOT, USER_PROFILE_ROOT and USER_SERVICE_ROOT privately when referenced. Reserved example domains, zero IDs, user assets and secret placeholders are non-operational. Do not execute sample commands until the actual dependency, input/output contract and consent are verified. No author environment or secret store is supplied or authorized.
+
+Changed executable resources are templates pending user configuration and functional testing, even when syntax passes. AST comparison ignores literal values and does not prove runtime equivalence. No imported script was executed.
+
+Placeholders require explicit template rendering or a local adapter; merely setting environment variables does not interpolate Python/JSON literals. Changed executable templates carry a requires_user_config fail-closed guard. Remove it only after rendering, reviewing distinct resource bindings and validating the configured copy locally.
+
+## Rights
+
+Original authors/notices retained where present. Root project license does not relicense imported works. Unknown is not a fabricated permissive license and is not itself a reason to omit the skill.
+
+Detected license: unknown; no independent license audit.
+
+## Missing resources and configuration
+
+- `<USER_DEPENDENCY:./animation-frames.js>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:./async-cheap-condition-before-await.md>`: Missing or intentionally withheld local reference; do not claim this resource is installed.
+- `<USER_DEPENDENCY:./async-cheap-condition-before-await.md>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:./async-defer-await.md>`: Missing or intentionally withheld local reference; do not claim this resource is installed.
+- `<USER_DEPENDENCY:./async-defer-await.md>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:./config.json>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:./images/logo.png>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:./server-hoist-static-io.md>`: Missing or intentionally withheld local reference; do not claim this resource is installed.
+- `<USER_DEPENDENCY:./server-hoist-static-io.md>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:Next.js>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:Node.js>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:React/Next.js>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:Response.json>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:area-description.md>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:index.js>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:next.config.js>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:next.js>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:non-Next.js>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:public/images/logo.png>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:r.json>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:rules/area-description.md>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+- `<USER_DEPENDENCY:test-cases.json>`: Referenced user artifact or external tool; not bundled. Configure USER_TOOLS_ROOT/USER_WORKSPACE_ROOT and verify its interface before use.
+
+## File transformations
+
+- `./AGENTS.md`: service-urls-parameterized, tenant-hosts-parameterized, url-review
+- `./metadata.json`: structured-json-sanitized
+- `./rules/bundle-analyzable-paths.md`: service-urls-parameterized, url-review
+- `./rules/client-swr-dedup.md`: tenant-hosts-parameterized, url-review
+- `./rules/js-batch-dom-css.md`: service-urls-parameterized, url-review
+- `./rules/js-min-max-loop.md`: service-urls-parameterized, url-review

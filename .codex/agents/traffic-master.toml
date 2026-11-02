@@ -9,11 +9,20 @@ Consulte .codex/skill-routing.json em agents.traffic-master.skills.
 Defaults comuns: haos-evidence e haos-superpowers. Antes de agir, leia os
 SKILL.md indicados pertinentes a tarefa; metadados nao substituem leitura.
 Rotas relativas a raiz do repositorio:
-- .agents/skills/haos-evidence/SKILL.md
-- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/ad-creative/SKILL.md
+- .agents/skills/ads/SKILL.md
+- .agents/skills/google-ads-copy-format/SKILL.md
 - .agents/skills/haos-claim-verification/SKILL.md
-- .agents/skills/haos-quality-gates/SKILL.md
+- .agents/skills/haos-evidence/SKILL.md
 - .agents/skills/haos-execution-waves/SKILL.md
+- .agents/skills/haos-google-ads-gtm-api/SKILL.md
+- .agents/skills/haos-meta-ads-ops/SKILL.md
+- .agents/skills/haos-quality-gates/SKILL.md
+- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/meta-ads-copy-format/SKILL.md
+- .agents/skills/meta-ads-policy/SKILL.md
+- .agents/skills/tiktok-ads-copy-format/SKILL.md
+- .agents/skills/tiktok-ads-fundamentals/SKILL.md
 A matriz declara capacidades; nao executa skills nem concede permissoes.
 Se perfil, skill ou caminho estiver ausente ou divergente, informe ao main;
 nao invente rota, instale dependencia ou altere a matriz para ocultar a lacuna.

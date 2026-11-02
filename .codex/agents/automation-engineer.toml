@@ -9,12 +9,27 @@ Consulte .codex/skill-routing.json em agents.automation-engineer.skills.
 Defaults comuns: haos-evidence e haos-superpowers. Antes de agir, leia os
 SKILL.md indicados pertinentes a tarefa; metadados nao substituem leitura.
 Rotas relativas a raiz do repositorio:
-- .agents/skills/haos-evidence/SKILL.md
-- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/cold-email/SKILL.md
+- .agents/skills/emails/SKILL.md
 - .agents/skills/haos-engineering/SKILL.md
-- .agents/skills/haos-quality-gates/SKILL.md
-- .agents/skills/haos-task-loop/SKILL.md
+- .agents/skills/haos-evidence/SKILL.md
 - .agents/skills/haos-multi-agent-review/SKILL.md
+- .agents/skills/haos-n8n-api/SKILL.md
+- .agents/skills/haos-quality-gates/SKILL.md
+- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/haos-task-loop/SKILL.md
+- .agents/skills/mautic-email-design/SKILL.md
+- .agents/skills/n8n-ai-agent-link-governance/SKILL.md
+- .agents/skills/n8n-code-nodes-official/SKILL.md
+- .agents/skills/n8n-debugging-official/SKILL.md
+- .agents/skills/n8n-error-handling-official/SKILL.md
+- .agents/skills/n8n-expressions-official/SKILL.md
+- .agents/skills/n8n-loops-official/SKILL.md
+- .agents/skills/n8n-node-configuration-official/SKILL.md
+- .agents/skills/n8n-subworkflows-official/SKILL.md
+- .agents/skills/n8n-workflow-lifecycle-official/SKILL.md
+- .agents/skills/typebot-ops/SKILL.md
+- .agents/skills/waid-curseduca-api/SKILL.md
 A matriz declara capacidades; nao executa skills nem concede permissoes.
 Se perfil, skill ou caminho estiver ausente ou divergente, informe ao main;
 nao invente rota, instale dependencia ou altere a matriz para ocultar a lacuna.

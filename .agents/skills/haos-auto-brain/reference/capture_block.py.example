@@ -1,0 +1,102 @@
+# -*- coding: utf-8 -*-
+"""
+HAOS Auto-Brain - bloco de captura passiva (referencia generica)
+
+Creditos: inspirado nas ideias do GBrain de Garry Tan
+(github.com/garrytan/gbrain, MIT): ingestao automatica, create_safety
+(anti-duplicata) e gap analysis. Esta e uma reimplementacao adaptada ao
+stack HAOS (hook Python + memoria markdown), nao o codigo do GBrain.
+
+O QUE FAZ:
+  Pluga no seu hook de "prompt submetido". Faz um APPEND silencioso de cada
+  prompt do usuario num inbox JSONL local (1 arquivo por dia), marcando os
+  candidatos a aprendizado duravel. Custo ZERO (sem LLM) e fail-safe (nunca
+  levanta excecao, nunca quebra o hook).
+
+COMO USAR:
+  No seu hook de prompt, depois de ler o prompt do usuario, chame:
+      _capture_prompt(prompt, session_id)
+  E so. O resto do hook (roteamento etc.) segue normal.
+
+CONFIG (tudo por variavel de ambiente, sem path de maquina):
+  HAOS_BRAIN_DIR  -> pasta de trabalho do brain (inbox/log/kill-switch).
+                     Sem ela, cai em ./_brain relativo ao processo.
+"""
+import os
+import json
+import datetime
+
+# ----------------------------------------------------------------------------
+# Caminhos (tudo via env, nada hardcoded)
+# ----------------------------------------------------------------------------
+BRAIN_DIR = os.environ.get("HAOS_BRAIN_DIR", os.path.join(os.getcwd(), "_brain"))
+BRAIN_OFF = os.path.join(BRAIN_DIR, ".brain_off")  # kill-switch global
+
+# Gatilhos de aprendizado duravel (preferencia/regra/correcao do usuario).
+# Ajuste este vocabulario ao idioma/estilo do seu usuario.
+LEARNING_TRIGGERS = (
+    "sempre", "nunca", "prefiro", "nao faca", "nao faça", "não faça",
+    "de agora em diante", "na verdade", "errado", "corrige", "corrija",
+    "lembra", "lembre", "evita", "evite", "regra", "padrao", "padrão",
+    "pode sempre", "nunca mais",
+)
+
+# Prompts triviais: nao sao candidatos a aprendizado.
+TRIVIAL = {
+    "ok", "okay", "sim", "nao", "não", "vai", "continua", "continue", "segue",
+    "pode", "blz", "beleza", "valeu", "obrigado", "obg", "isso", "certo", ".",
+}
+
+# Prefixos de comando (ja roteados em outro lugar): nao contam como aprendizado.
+COMMAND_PREFIXES = ("@", "#", "mb:", "MB:", "Mb:", "/")
+
+
+def _is_learning_candidate(prompt_stripped):
+    """True se o prompt parece carregar um aprendizado duravel."""
+    low = prompt_stripped.lower()
+    if prompt_stripped.startswith(COMMAND_PREFIXES):
+        return False
+    if low.strip(" .!?") in TRIVIAL:
+        return False
+    return any(t in low for t in LEARNING_TRIGGERS)
+
+
+def _capture_prompt(prompt, session_id):
+    """Append fail-safe de 1 linha JSON no inbox do dia. Nunca levanta excecao."""
+    try:
+        # Kill-switch global: se .brain_off existe, nao captura nada.
+        if os.path.exists(BRAIN_OFF):
+            return
+        if not prompt or not prompt.strip():
+            return
+        os.makedirs(BRAIN_DIR, exist_ok=True)
+        today = datetime.date.today().isoformat()
+        inbox = os.path.join(BRAIN_DIR, "inbox-%s.jsonl" % today)
+        rec = {
+            "ts": datetime.datetime.now().isoformat(timespec="seconds"),
+            "session_id": session_id or "",
+            "prompt": prompt.strip()[:2000],
+            "learning_candidate": _is_learning_candidate(prompt.strip()),
+        }
+        with open(inbox, "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception:
+        # Captura e um efeito colateral silencioso: jamais quebra o hook.
+        pass
+
+
+# Exemplo de integracao num hook de prompt submetido:
+if __name__ == "__main__":
+    # Simula um payload de hook chegando via stdin.
+    import sys
+    try:
+        data = sys.stdin.read()
+        payload = json.loads(data) if data.strip() else {}
+    except Exception:
+        payload = {}
+    # IMPORTANTE: o hook UserPromptSubmit do Claude Code manda o texto no campo
+    # "prompt" (nao "user_prompt"). Ler "prompt" primeiro, com fallbacks.
+    prompt = payload.get("prompt", "") or payload.get("user_prompt", "") or payload.get("content", "")
+    _capture_prompt(prompt, payload.get("session_id", ""))
+    print(json.dumps({"continue": True}, ensure_ascii=False))
+

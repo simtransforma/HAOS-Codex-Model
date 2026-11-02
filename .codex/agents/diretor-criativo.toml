@@ -9,11 +9,11 @@ Consulte .codex/skill-routing.json em agents.diretor-criativo.skills.
 Defaults comuns: haos-evidence e haos-superpowers. Antes de agir, leia os
 SKILL.md indicados pertinentes a tarefa; metadados nao substituem leitura.
 Rotas relativas a raiz do repositorio:
-- .agents/skills/haos-evidence/SKILL.md
-- .agents/skills/haos-superpowers/SKILL.md
-- .agents/skills/haos-design/SKILL.md
 - .agents/skills/haos-copy/SKILL.md
+- .agents/skills/haos-design/SKILL.md
+- .agents/skills/haos-evidence/SKILL.md
 - .agents/skills/haos-quality-gates/SKILL.md
+- .agents/skills/haos-superpowers/SKILL.md
 A matriz declara capacidades; nao executa skills nem concede permissoes.
 Se perfil, skill ou caminho estiver ausente ou divergente, informe ao main;
 nao invente rota, instale dependencia ou altere a matriz para ocultar a lacuna.

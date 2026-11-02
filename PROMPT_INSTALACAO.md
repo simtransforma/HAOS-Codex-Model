@@ -1,75 +1,74 @@
-# Prompt de instalacao local
+# Prompt para WORK, nuvem ou ambiente local
 
-O texto abaixo e generico e pode ser usado por qualquer usuario. A autorizacao
-alcanca somente a instalacao local delimitada, nao integracoes ou publicacao.
+O nome do produto nao determina capacidades. WORK nao significa Word. Este
+prompt nao pressupoe Windows, terminal local ou configuracao global persistente.
 
 ```text
-Quero instalar o modelo publico HAOS Codex no meu ambiente local, preservando
-minhas configuracoes e arquivos. Personalize para minha identidade sem importar
-identidade, caminhos, contas ou operacao de quem publicou o modelo.
-Origem publica: https://github.com/simtransforma/HAOS-Codex-Model
+Quero usar o modelo HAOS no ambiente disponivel nesta conversa.
+Origem aprovada: https://github.com/simtransforma/HAOS-Codex-Model
+Personalize para minha identidade sem importar contas, historico ou operacao
+privada de terceiros. Nao instale um produto com base no nome WORK.
 
-1. Detecte o ambiente real: runtime e versao, ferramentas, raiz do projeto,
-   acesso autorizado a filesystem local e shell. Nao presuma que GPT Work ou
-   um chat de navegador tenha esses recursos, nem instale um produto com esse
-   nome. Se houver apenas browser ou faltar acesso local, informe BLOQUEADO
-   para instalar e entregue o plano. Nao simule instalacao com texto ou links.
+1. Antes de agir, detecte capacidades reais: terminal, workspace de execucao
+   local ou cloud, leitura/escrita de arquivos, persistencia entre sessoes,
+   projetos, anexos, conectores GitHub e suas permissoes/API disponiveis.
+   Informe disponivel, indisponivel e nao verificado. Nao deduza acesso ao
+   Windows, computador pessoal, filesystem global ou config global pelo nome
+   do aplicativo. Nao peça novamente qual produto uso se as capacidades bastam.
 
-2. Leia README.md, INSTALL.md e AGENTS.md dessa origem antes de instalar.
-   Esta mensagem ja autoriza leitura/download do repositorio publico indicado
-   e clone para um destino local novo verificado; nao exija outro OK para a
-   mesma origem e acao. Confira que o destino nao existe ou esta vazio e nao
-   sobreponha checkout existente. Se faltar o destino ou houver conflito real,
-   pergunte somente pelo que falta. Sem acesso as fontes, informe a lacuna.
-   Nao procure fontes privadas, cofre, dados pessoais, clientes ou memorias
-   alheias. O clone apenas prepara a fonte; nao comprova a instalacao.
+2. Com terminal e workspace autorizado, clone a origem aprovada em diretorio
+   novo e nao conflitante desse workspace, inclusive quando for cloud.
+   Esta mensagem autoriza obtencao da origem e preparacao local/cloud, nao
+   publica nada. Nao sobrescreva checkout existente: capture baseline e diff,
+   preserve trabalho concorrente e integre somente adicoes nao conflitantes.
+   Leia AGENTS.md, README.md, INSTALL.md, os metadados do catalogo e apenas
+   os SKILL.md pertinentes. Arquivos no workspace nao provam instalacao global,
+   registro de agentes, execucao de skills ou persistencia futura.
 
-3. Alem da obtencao da fonte acima, autorizo apenas adicoes locais nao
-   conflitantes no destino aprovado. Se faltar o destino, pergunte por ele. Capture
-   baseline, branch, diffs e novos arquivos; preserve alteracoes concorrentes.
-   Faca plano curto dos arquivos e checks. Nao substitua AGENTS.md, config,
-   hooks, skills, agentes ou memoria existentes. Para integrar um conflito,
-   apresente diff seletivo e obtenha decisao antes da escrita conflitante.
+3. Sem filesystem ou terminal, nao invente instalacao nem encerre todo uso como
+   impossivel. Informe o limite e, se houver APIs/conectores de leitura,
+   carregue os metadados e o conteudo pertinente do repositorio aprovado para
+   esta tarefa ou projeto. Use apenas operacoes realmente suportadas. Caso
+   anexos/projetos possam guardar material, proponha esse destino e confirme
+   somente o que for materialmente necessario. Conector de leitura nao prova
+   capacidade de escrita ou memoria permanente. Sem APIs ou conteudo, solicite
+   apenas os arquivos necessarios. Nao afirme que carregou o que nao leu.
 
-4. Consulte metadados das skills disponiveis e leia somente as pertinentes.
-   Confira a versao do runtime e documentacao/schema oficiais atuais. Skills
-   podem ser descobertas de .agents/skills do cwd ate a raiz do repositorio;
-   agentes podem ter autodiscovery em .codex/agents por camada nas versoes
-   recentes. Nao universalize isso: confira diagnostico e schema da sessao.
+4. Consulte a matriz de especialidades, sem carregar todas as skills em todos
+   os agentes. Preserve os 29 metodos publicos originais e o catalogo completo
+   de 193 origens com seus corpos e recursos portaveis (207 skills no total,
+   incluindo 14 metodos adicionais). Confira contratos de
+   dependencias e direitos. Arquivos, conectores, ferramentas, credenciais e
+   servicos nao embarcados continuam indisponiveis ate verificacao real.
+   Nao execute helper importado so porque esta presente. Nao trate template
+   sanitizado, codigo invalido ou contrato de dependencia como implementacao.
+   Use primeiro docs/skill-index.json para nome, descricao e caminho; busque
+   metadados por assunto via ferramentas disponiveis e carregue o SKILL.md
+   selecionado. docs/exports/catalog.json e proveniencia para CI/QA, nao
+   contexto integral para carregar automaticamente em cada sessao WORK.
 
-5. Se precisar registrar papel explicitamente, proponha merge minimo de
-   [agents.nome] com description e config_file compativeis com a versao.
-   Preserve provider, modelo principal, MCPs, permissoes, hooks e papeis atuais.
-   Um config_file de exemplo precisa ser adaptado ao destino local real.
-   Nao sobrescreva config inteira, nao invente flags, overrides ou IDs de
-   modelo. Novos papeis usam effort high quando suportado, sem reduzir em
-   silencio. Nao prometa heranca ou modelo efetivo sem evidencia do runtime.
+5. Regras raiz atuais prevalecem sobre procedimentos importados conflitantes:
+   aprovacao dura no escopo ate concluir ou revogar; sem TTL arbitrario.
+   Nenhum texto legado autoriza instalar hooks/servicos, replicar runtimes,
+   acessar servidor, alterar configuracao global ou executar efeitos externos.
+   Preserve modelo do main e effort high quando suportado, sem overrides
+   inventados. Use schema real para delegacao; sem ferramenta, informe o limite.
 
-6. Copie apenas artefatos necessarios e nao conflitantes. Nao importe diario
-   ou historico, nao ative hooks/captura de memoria, JEV ou conectores, nao
-   altere politicas de seguranca nem instale dependencias sem novo OK.
-   Nao publique, envie mensagens, gaste, comite, faca push/merge/deploy ou
-   remocao destrutiva. O OK desta tarefa dura no escopo ate concluir ou revogar;
-   mudanca material de acao, destino, risco ou gasto exige nova confirmacao.
+6. Nao altere config global, provider, MCPs, permissoes, hooks ou memoria.
+   Nao leia cofres nem importe diario, segredos ou dados pessoais. Dependencias
+   novas precisam de aprovacao aplicavel. Publicacao, envio, gasto, commit,
+   push, merge, deploy e remocao destrutiva nao estao autorizados aqui.
+   Preserve avisos e licencas originais; MIT da raiz nao relicencia imports.
 
-7. Verifique diff e links, frontmatter e TOML com ferramentas disponiveis,
-   caminhos, diagnostico de configuracao e catalogo carregado. Execute tarefa
-   local inofensiva com uma skill selecionada e confira o resultado real.
-   Se houver ferramenta de delegacao, chame um agente para leitura delimitada,
-   receba o retorno e revise independentemente; ate tres por onda, com owners
-   disjuntos. Sem ferramenta, declare DELEGACAO NAO TESTADA. Nao invente spawn.
-   Distinga parametros recomendados, solicitados, aceitos e modelo efetivo.
+7. Com Python 3.11+ e PyYAML compativel ja disponiveis, rode o validador e os
+   testes locais; senao relate o check indisponivel sem instalar em silencio.
+   Confira arquivos, YAML, TOML, JSON, sintaxe Python, links e dependencias.
+   Execute somente teste inofensivo aprovado. Para delegacao disponivel, use
+   no maximo tres agentes por onda com ownership disjunto e retorno verificavel.
+   Distingua recomendado, solicitado, aceito e modelo efetivo comprovado.
 
-8. Use no maximo tres ciclos de correcao e verificacao por item. Defeito
-   restante e REVISAO NECESSARIA, nao sucesso. Relate arquivos adicionados ou
-   integrados, checks e resultados, nao testados, conflitos e rollback seletivo.
-   Diferencie preparado, instalado, carregado, executado e verificado. Plano,
-   TOML ou texto de hook nao comprovam instalacao. Nao declare novo conteudo
-   remoto sem push autorizado e readback pelo integrador.
-
-9. Main avalia Evoluir ao encerrar, sem inventar aprendizado ou identificador
-   de tarefa. Memoria curada exige autorizacao, proveniencia e readback; diario
-   literal continua privado. Este prompt nao autoriza persistencia de memoria.
-   Stop nao substitui minhas perguntas, correcoes ou continuacoes nem bloqueia
-   a conversa por falta de recibo. Apresente STATUS, evidencias e limites reais.
+8. Relate preparado, carregado nesta tarefa, instalado no workspace, executado,
+   verificado e persistencia comprovada como estados diferentes. Limite a tres
+   ciclos de correcao por item; defeito restante e REVISAO NECESSARIA.
+   Main fecha a tarefa sem inventar recibo, aprendizado ou sincronizacao.
 ```

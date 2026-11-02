@@ -19,7 +19,11 @@ def placeholder(value: str) -> bool:
     )
 
 
-EMAIL = re.compile(r"(?<![\w.+-])[\w.+-]+@([a-z0-9.-]+\.[a-z]{2,})(?![\w.-])", re.I)
+EMAIL = re.compile(
+    r"(?<![\w.+-])[\w.+-]{1,64}@"
+    r"(?=[a-z0-9.-]{1,253}(?![\w.-]))"
+    r"([a-z0-9.-]{1,250}\.[a-z]{2,63})(?![\w.-])", re.I
+)
 WINDOWS_PATH = re.compile(r"\b(?:[a-z]:[/\\]+Users[/\\]+|H:[/\\]+)([^\s\"'`/\\]+)", re.I)
 PHONE = re.compile(r"(?<![\w\d])\+[1-9](?:[ .()-]*\d){7,14}(?!\d)|\(\d{2}\)\s*9?\d{4}[- .]\d{4}(?!\d)")
 LABELED_PHONE = re.compile(
@@ -40,7 +44,7 @@ SECRET_PATTERNS = (
     re.compile(r"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b"),
     re.compile(r"\bxox[baprs]-[A-Za-z0-9-]{20,}\b"),
     re.compile(r"\beyJ[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}\.[A-Za-z0-9_-]{16,}\b"),
-    re.compile(r"\b[a-z][a-z0-9+.-]*://[^\s/:]+:[^\s/@]{4,}@", re.I),
+    re.compile(r"(?<![a-z0-9+.-])[a-z][a-z0-9+.-]*://[^\s/:]+:[^\s/@]{4,}@", re.I),
 )
 SECRET_ASSIGNMENT = re.compile(
     r"\b(?:api[_-]?key|access[_-]?token|refresh[_-]?token|client[_-]?secret|"
@@ -62,7 +66,7 @@ def sensitive_rules(text: str) -> set[str]:
     rules: set[str] = set()
     if any(not placeholder(match[1]) for match in WINDOWS_PATH.finditer(text)):
         rules.add("private-environment-path")
-    for match in EMAIL.finditer(text):
+    for match in EMAIL.finditer(text) if "@" in text else ():
         domain = match[1].lower()
         if not any(domain == safe or domain.endswith("." + safe) for safe in (
             "example.com", "example.net", "example.org", "example.invalid", "example.test"
@@ -82,10 +86,8 @@ def sensitive_rules(text: str) -> set[str]:
         value = match[1]
         if re.search(r"\d", value) and not placeholder(value):
             rules.add("production-id")
-    if any(
-        not obvious_placeholder(match[0])
-        for pattern in SECRET_PATTERNS for match in pattern.finditer(text)
-    ):
+    candidates = SECRET_PATTERNS if "://" in text and "@" in text else SECRET_PATTERNS[:-1]
+    if any(not obvious_placeholder(match[0]) for pattern in candidates for match in pattern.finditer(text)):
         rules.add("secret-pattern")
     if any(not placeholder(match[1]) for match in SECRET_ASSIGNMENT.finditer(text)):
         rules.add("secret-assignment")

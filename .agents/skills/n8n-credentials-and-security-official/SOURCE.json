@@ -1,0 +1,69 @@
+{
+  "repo": "n8n-io/skills",
+  "commit": "180b8415e3b73f78828cfa01e908e67f89f2a139",
+  "license": "Apache-2.0",
+  "path": "skills/n8n-credentials-and-security-official",
+  "localAdaptation": "HAOS 2026-10-04; see ADAPTACAO-HAOS.md; upstream bodies include identified local corrections",
+  "upstreamFiles": [
+    {
+      "path": "LICENSE",
+      "gitBlob": "c87e50b21d7195576cfda86509960d9f80a1d3bd",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "skills/n8n-credentials-and-security-official/SKILL.md",
+      "gitBlob": "ab550731df56ce82b94b493b1427ae8fed9d8e88",
+      "sha256": "2c5b662db098ad0ac7f94d509a8e544f6155b3ca2231b83fb1011a6f17525bbd"
+    },
+    {
+      "path": "skills/n8n-credentials-and-security-official/references/CREDENTIAL_SYSTEM.md",
+      "gitBlob": "09429830e9563fba4d44b72cf8a6fe958183a032",
+      "sha256": "d8b5425a14b0c8ca789c435323603c6f3674b305b13ef47c16545c14acc74a68"
+    },
+    {
+      "path": "skills/n8n-credentials-and-security-official/references/CUSTOM_CREDENTIALS.md",
+      "gitBlob": "9e339571c5cf8ced0c2cfe96b460455bbc589df8",
+      "sha256": "245b3b3401e2d340bb293f6d7bd0da64467a4d57501679890740dc7fa2dec749"
+    },
+    {
+      "path": "skills/n8n-credentials-and-security-official/references/FINDING_API_DOCS.md",
+      "gitBlob": "4f1b41be6047ed97e6c1ad93bf69986d438b593c",
+      "sha256": "71274bdc8e91711beb07536cbede1a8300523b41d20697550de6f708d923f5b2"
+    },
+    {
+      "path": "skills/n8n-credentials-and-security-official/references/HTTP_REQUEST_WITH_AUTH.md",
+      "gitBlob": "522aba689d49144ce8fca39660034147b9dd9f84",
+      "sha256": "44e172134c1fcedaaedc530511b87cdfa56f64fdf8a137d841dee536aada3932"
+    }
+  ],
+  "installedFiles": [
+    {
+      "path": "ADAPTACAO-HAOS.md",
+      "sha256": "fa224947236ecbd30cf2c39618ada3bc14690df78bb5607ee9caf4b9aa9b16f1"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "references/CREDENTIAL_SYSTEM.md",
+      "sha256": "edc7c851fa8261741270ca0ae1f9fd91f1649e5ce5f4247c5391e51c875a8e7a"
+    },
+    {
+      "path": "references/CUSTOM_CREDENTIALS.md",
+      "sha256": "868a686e9861287a80911c164f135c3a8a1079d6e11fb3d0180b5ddcb7cb01f0"
+    },
+    {
+      "path": "references/FINDING_API_DOCS.md",
+      "sha256": "f39d133d672f8e914d3449cf828bb810a2447e24033faf8eaf8211ab54e7b446"
+    },
+    {
+      "path": "references/HTTP_REQUEST_WITH_AUTH.md",
+      "sha256": "464bb99b58e9406d10e5a63e36f1a313fb8c42e7e961608e6a9a6647c3e95eab"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "23df9620f75c75a3ec1833fe11b714419266210062d753deb7621e65818204da"
+    }
+  ]
+}

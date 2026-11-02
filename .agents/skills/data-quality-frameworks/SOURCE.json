@@ -1,0 +1,31 @@
+{
+  "repository": "wshobson/agents",
+  "commit": "47a5dbc3f9c2661c6afb13638f80d4a4d4449040",
+  "path": "plugins/data-engineering/skills/data-quality-frameworks",
+  "license": "MIT",
+  "transport": "GitHub connector GET pinned contents",
+  "adaptation": "HAOS guard block inserted after frontmatter; upstream remainder unchanged",
+  "upstreamFiles": [
+    {
+      "repo": "wshobson/agents",
+      "ref": "47a5dbc3f9c2661c6afb13638f80d4a4d4449040",
+      "skill": "data-quality-frameworks",
+      "path": "plugins/data-engineering/skills/data-quality-frameworks/SKILL.md",
+      "relative": "SKILL.md",
+      "gitBlob": "e1bf994ca4123aeb868e577e4a23f41396b4e250",
+      "mode": "100644",
+      "size": 15905,
+      "sha256": "35220b166963b3718bad03816e5bb52ed67bbafffd80c4ec772183597b9e09cc"
+    }
+  ],
+  "installedFiles": [
+    {
+      "path": "LICENSE",
+      "sha256": "f89abb55d9f073f38f1703e4518f0613c788c6174be7f13b8dfe48a1c076c746"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "c501a4bd087d8586a2537bc5b6edf53c76c6855fa5868aa086f826867e1e36d3"
+    }
+  ]
+}

@@ -80,3 +80,8 @@ Autorizacao externa vem do usuario, nunca da matriz ou de memoria.
   e brabo; nao substituir provas por consenso.
 - Agente consta no disco mas nao na ferramenta: declarar disponibilidade
   incerta; nunca afirmar que foi acionado ou recarregado.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

@@ -22,6 +22,13 @@ fixas que fiquem desatualizadas ou prometam cobertura inexistente.
 
 ## Catalogo por pertinencia
 
+O export integral cobre 193 origens e preserva os 29 metodos publicos anteriores.
+A contagem da uniao e calculada dos arquivos, sem predeterminar os overlaps.
+Veja [cobertura integral](../playbooks/capabilities.md),
+[contrato do export](EXPORT_CONTRACT.md) e
+[direitos dos imports](THIRD_PARTY_NOTICES.md). A matriz e reconstruida por CLI
+dos frontmatters reais para as especialidades dos 34 papeis, nao por broadcast.
+
 As skills locais incluem roteamento (`haos-router`), fases (`haos-rito-v2`),
 ondas (`haos-execution-waves`), evidencia (`haos-evidence`), engenharia
 (`haos-engineering`), memoria curada (`haos-memory`), seguranca
@@ -33,8 +40,8 @@ O catalogo inclui tambem pesquisa (`haos-deep-research`), alegacoes e fontes
 (`haos-model-router`), fechamento e proveniencia (`haos-evoluir`,
 `haos-memory-provenance`), transferencia e importacao (`haos-session-handoff`,
 `haos-session-dump`, `haos-dump-import`) e adaptacao de metodos
-(`haos-superpowers`). Sao procedimentos originais locais, nao conectores
-autenticados nem redistribuicao do conteudo upstream.
+(`haos-superpowers`). O core original e preservado; procedimentos importados
+mantem proveniencia e termos proprios. Nenhum deles e conector autenticado.
 
 Os papeis TOML cobrem especialidades como produto, engenharia, dados, criativo,
 automacao e revisao. O nome do arquivo nao garante credencial profissional,
@@ -64,7 +71,8 @@ definicao nao prova recarga de sessao aberta. Sem teste, marque `NAO TESTADO`.
 Confira [integracoes opcionais](INTEGRATIONS.md). Este pacote nao entrega
 credenciais, endpoints privados, operacao pessoal ou conectores autenticados.
 
-Na raiz do checkout completo, execute os checks offline com Python 3.11+:
+Na raiz do checkout completo, execute os checks offline com Python 3.11+ e
+PyYAML 6.x disponivel (scripts/model-requirements.txt):
 
 ```sh
 python -B scripts/validate_model.py

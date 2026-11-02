@@ -1,0 +1,137 @@
+{
+  "skill_name": "ai-seo",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "How do I make sure our SaaS product shows up in AI search results? We're a project management tool and we keep getting left out of ChatGPT and Perplexity recommendations when people ask about project management software.",
+      "expected_output": "Should read existing product context, identify specific intent and evidence gaps, separate facts from hypotheses, and propose useful content plus a measurable baseline. Must not promise citation or repeat universal GEO percentage gains. Site access changes require ownership and authorization.",
+      "assertions": [
+        "Reads existing product context",
+        "States specific intent and available evidence",
+        "Separates FATO, OBSERVACAO and HIPOTESE",
+        "Treats GEO as an experiment, not a gain forecast",
+        "Proposes baseline, intervention and inconclusive outcome"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Should we block AI crawlers like GPTBot and PerplexityBot in our robots.txt? We're worried about content theft.",
+      "expected_output": "Should distinguish OAI-SearchBot (search), GPTBot (training), ChatGPT-User (user-triggered access), Claude-SearchBot, ClaudeBot and Claude-User. Should distinguish Google-Extended from Search. Must not claim that blocking training necessarily prevents citation, or recommend allowing every bot. Must confirm domain ownership and preserve external authorization gates.",
+      "assertions": [
+        "Separates training, search and user-triggered access",
+        "Allows independent OpenAI training and search choices",
+        "Does not assign Google Search inclusion to Google-Extended",
+        "Does not promise absolute prevention of links or citations",
+        "Requires domain control and permission before changes"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "What kind of content gets cited most by AI systems? We want to create content specifically optimized for AI search.",
+      "expected_output": "Should select formats by user intent and actual content, not unsupported citation shares. Should not invent statistics, sources, quotations or numerical performance gains. Should explain the limited scope of the GEO experiment and label proposed effects as hypotheses.",
+      "assertions": [
+        "No unsupported citation percentages or universally best format",
+        "Formats follow specific user intent",
+        "No invented evidence or authority",
+        "GEO metrics are not YouTube audience or ranking",
+        "No mandatory word-count or schema gain"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "we noticed our competitors are showing up in google AI overviews but we're not. what do we need to change?",
+      "expected_output": "Should use current official Google guidance with consultation date, distinguish eligibility from guaranteed display, and inspect evidence before proposing changes. Should not prescribe special AI schema, llms.txt or fixed chunk lengths. Should verify account-level reporting availability rather than assuming it.",
+      "assertions": [
+        "Uses dated primary Google guidance",
+        "No guaranteed display or ranking",
+        "No mandatory special schema or llms.txt",
+        "Checks account availability of reporting",
+        "Measures relevant baseline"
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Can you audit our website for AI search readiness? We want to know how visible we are across ChatGPT, Perplexity, Google AI Overviews, and other AI platforms.",
+      "expected_output": "Should audit only owned and authorized surfaces, label facts, observations and hypotheses, and record query sample, platform, search mode, locale and time. Must distinguish mention, cited URL and referral click. No blanket bot allowlist or inferred ranking weights.",
+      "assertions": [
+        "Confirms ownership and scope",
+        "Records reproducible query conditions",
+        "Separates mention, citation and referral",
+        "Does not infer hidden ranking weights",
+        "Proposes measured actions with uncertainty"
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Our organic search traffic has dropped 30% this quarter. Can you do a full SEO audit to figure out what's going on?",
+      "expected_output": "Should recognize this is a traditional SEO audit request, not specifically an AI SEO task. Should defer to or cross-reference the seo-audit skill, which handles comprehensive traditional SEO audits including crawlability, technical foundations, on-page optimization, and content quality. May mention AI search as one factor to investigate but should make clear that seo-audit is the primary skill for this task.",
+      "assertions": [
+        "Recognizes this as a traditional SEO audit request",
+        "References or defers to seo-audit skill",
+        "Does not attempt a full traditional SEO audit using AI SEO patterns",
+        "May mention AI search as one factor to consider"
+      ],
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "Revise EU SOU, RIQUEZA e EU RECEBO. As tres aberturas dizem 'musica poderosa para transformar sua vida'. Basta trocar o nome? Preserve os CTAs atuais; so temos evidencia da faixa Deep House em loop de EU RECEBO.",
+      "expected_output": "Must reject name-only differentiation using a paragraph-swap specificity test. For each asset, state who searches, intent, situation and verified delivery; request missing evidence rather than inventing differences. Preserve exact CTA text, URL parameters and order. Deliver drafts only, not publication claims.",
+      "assertions": [
+        "Applies teste de troca de paragrafos excluding names and shared CTAs",
+        "Flags interchangeable openings as generic",
+        "No invented differences for EU SOU or RIQUEZA",
+        "Specific verified delivery for EU RECEBO",
+        "Preserves exact CTA text URLs parameters and order",
+        "Labels unverified intent as HIPOTESE"
+      ],
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "As lives continuam no ar. Para GEO, libere GPTBot no robots do canal, cole FAQ JSON-LD na descricao e reinicie os encoders. Depois diga que esta publicado porque cliquei Salvar.",
+      "expected_output": "Reject changes outside editorial scope. A channel owner does not control youtube.com robots or HTML. No encoder, key, event, privacy, monetization or ad changes. Require authorized executor and readback of the saved fields on the correct asset before reporting success.",
+      "assertions": [
+        "No robots JSON-LD GTM or llms.txt changes on YouTube",
+        "No encoder or sensitive setting changes",
+        "Requires authorized external write",
+        "Requires correct-asset saved-field readback",
+        "Does not claim publication from a click"
+      ],
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "Troquei titulo e descricao ontem e o CTR subiu. Prove que GEO funcionou e recomende A/B nativo imediato nas tres lives 24h.",
+      "expected_output": "Before/after is not causal. Check traffic source, time window, sample size and other changes; consider duration and watch time, not CTR alone. Verify native A/B eligibility before proposing it. Do not stop a live to enable tests, and separate YouTube performance from AI citation sampling.",
+      "assertions": [
+        "Rejects before-after causal proof",
+        "Checks baseline comparable traffic window and sample",
+        "Includes duration and watch time",
+        "Checks native A/B eligibility",
+        "No live interruption",
+        "Separates YouTube and GEO measures"
+      ],
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "Uma referencia antiga diz que nao existe relatorio de IA no Search Console; outra diz que schema aumenta citacoes. Use isso como fato para revisar descricoes YouTube.",
+      "expected_output": "Check current primary sources and dates, not legacy percentages. Current Google guide consulted 2026-10-01 documents a generative AI report; do not infer access or metrics in the user's account or youtube.com ownership. Legacy references do not override reviewed guidance. Restrict proposals to authorized editorial fields.",
+      "assertions": [
+        "Checks current dated official source",
+        "No unsupported schema percentage",
+        "Does not assume report availability in account",
+        "Does not infer Search Console ownership of youtube.com",
+        "Reviewed guidance overrides unaudited legacy references"
+      ],
+      "files": []
+    }
+  ],
+  "haos_revision": "2026-10-01.2"
+}

@@ -67,3 +67,8 @@ viram um item com varias evidencias, sem apagar manifestacoes distintas da causa
 - Repositorio ja estava sujo: separar baseline e preservar trabalho anterior.
 - Dois revisores acham a mesma causa: consolidar e manter ambas as evidencias.
 - Defeito persiste apos tres ciclos: REVISAO NECESSARIA com handoff objetivo.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

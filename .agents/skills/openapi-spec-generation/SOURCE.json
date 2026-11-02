@@ -1,0 +1,61 @@
+{
+  "repository": "wshobson/agents",
+  "commit": "156b7a5e7a8b93642628a339ee4039c925b34c7f",
+  "path": "plugins/documentation-generation/skills/openapi-spec-generation",
+  "license": "MIT",
+  "transport": "GitHub connector GET pinned contents",
+  "adaptation": "HAOS guard block inserted after frontmatter; upstream remainder unchanged",
+  "upstreamFiles": [
+    {
+      "repo": "wshobson/agents",
+      "ref": "156b7a5e7a8b93642628a339ee4039c925b34c7f",
+      "skill": "openapi-spec-generation",
+      "path": "plugins/documentation-generation/skills/openapi-spec-generation/SKILL.md",
+      "relative": "SKILL.md",
+      "gitBlob": "6f86431cdd092ff5edfc8b70b2a0d30481428da8",
+      "mode": "100644",
+      "size": 2043,
+      "sha256": "8071736973f8a99cbe8644e21f638493ac062c77d650d8fabc4a469285485d7e"
+    },
+    {
+      "repo": "wshobson/agents",
+      "ref": "156b7a5e7a8b93642628a339ee4039c925b34c7f",
+      "skill": "openapi-spec-generation",
+      "path": "plugins/documentation-generation/skills/openapi-spec-generation/references/code-first-and-tooling.md",
+      "relative": "references/code-first-and-tooling.md",
+      "gitBlob": "fc3bb67545b50e6b461492c439c5ab2d3bfae85d",
+      "mode": "100644",
+      "size": 11762,
+      "sha256": "533398d65b933040d13e642414e6b9846adbe7d5c95947223beffdb3ebe1590f"
+    },
+    {
+      "repo": "wshobson/agents",
+      "ref": "156b7a5e7a8b93642628a339ee4039c925b34c7f",
+      "skill": "openapi-spec-generation",
+      "path": "plugins/documentation-generation/skills/openapi-spec-generation/references/details.md",
+      "relative": "references/details.md",
+      "gitBlob": "65270f3b008b92f7284ce82617cd0713b8b8a3a2",
+      "mode": "100644",
+      "size": 11928,
+      "sha256": "b7c681062118a47126662bc6463b9be9430a45b983ddde71d1bdaf7fd091ad51"
+    }
+  ],
+  "installedFiles": [
+    {
+      "path": "LICENSE",
+      "sha256": "f89abb55d9f073f38f1703e4518f0613c788c6174be7f13b8dfe48a1c076c746"
+    },
+    {
+      "path": "references/code-first-and-tooling.md",
+      "sha256": "533398d65b933040d13e642414e6b9846adbe7d5c95947223beffdb3ebe1590f"
+    },
+    {
+      "path": "references/details.md",
+      "sha256": "b7c681062118a47126662bc6463b9be9430a45b983ddde71d1bdaf7fd091ad51"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "417839432922ccb4b934f7fa30d7fa922c865f7dcdde75cf04f4b0be426b8d16"
+    }
+  ]
+}

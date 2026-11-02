@@ -9,12 +9,19 @@ Consulte .codex/skill-routing.json em agents.dev-backend.skills.
 Defaults comuns: haos-evidence e haos-superpowers. Antes de agir, leia os
 SKILL.md indicados pertinentes a tarefa; metadados nao substituem leitura.
 Rotas relativas a raiz do repositorio:
-- .agents/skills/haos-evidence/SKILL.md
-- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/fullstack-dev/SKILL.md
 - .agents/skills/haos-engineering/SKILL.md
+- .agents/skills/haos-evidence/SKILL.md
+- .agents/skills/haos-meta-stape-api/SKILL.md
+- .agents/skills/haos-multi-agent-review/SKILL.md
 - .agents/skills/haos-quality-gates/SKILL.md
 - .agents/skills/haos-structural-refactor/SKILL.md
-- .agents/skills/haos-multi-agent-review/SKILL.md
+- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/openapi-spec-generation/SKILL.md
+- .agents/skills/software-architecture/SKILL.md
+- .agents/skills/software-engineer/SKILL.md
+- .agents/skills/supabase/SKILL.md
+- .agents/skills/youtube-api-canais/SKILL.md
 A matriz declara capacidades; nao executa skills nem concede permissoes.
 Se perfil, skill ou caminho estiver ausente ou divergente, informe ao main;
 nao invente rota, instale dependencia ou altere a matriz para ocultar a lacuna.

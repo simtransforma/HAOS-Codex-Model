@@ -1,0 +1,37 @@
+schema_version: 1
+concept_id: conceito-inequivoco
+reference_sha256: pending
+candidate_sha: pending
+screenshot_set:
+  - state: preview
+    viewport: 390x844
+    file: pending
+    focal_bbox: pending
+  - state: preview
+    viewport: 1366x768
+    file: pending
+    focal_bbox: pending
+allowlist:
+  files: []
+  literals: []
+  assets: []
+  behaviors: []
+protected_contract:
+  copy: frozen
+  routes: frozen
+  api: frozen
+  utm: frozen
+  tracking: frozen
+  integrations: frozen
+visual_acceptance:
+  status: pending
+  approved_candidate_sha: null
+publish_authorization:
+  status: pending
+  authorized_candidate_sha: null
+live_readback:
+  status: pending
+  candidate_sha: null
+  cache_buster: null
+  bundle_assets: []
+  screenshot_set: []

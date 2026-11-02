@@ -9,12 +9,38 @@ Consulte .codex/skill-routing.json em agents.pesquisador.skills.
 Defaults comuns: haos-evidence e haos-superpowers. Antes de agir, leia os
 SKILL.md indicados pertinentes a tarefa; metadados nao substituem leitura.
 Rotas relativas a raiz do repositorio:
-- .agents/skills/haos-evidence/SKILL.md
-- .agents/skills/haos-superpowers/SKILL.md
-- .agents/skills/haos-deep-research/SKILL.md
+- .agents/skills/benchmark-modelo-llm/SKILL.md
+- .agents/skills/competitor-profiling/SKILL.md
+- .agents/skills/content-strategy/SKILL.md
+- .agents/skills/correios-preco-frete/SKILL.md
+- .agents/skills/haos-auto-brain/SKILL.md
 - .agents/skills/haos-claim-verification/SKILL.md
-- .agents/skills/haos-source-quality-auditor/SKILL.md
+- .agents/skills/haos-deep-research/SKILL.md
+- .agents/skills/haos-evidence/SKILL.md
+- .agents/skills/haos-local-research/SKILL.md
 - .agents/skills/haos-mega-brain/SKILL.md
+- .agents/skills/haos-mega-brain-lite/SKILL.md
+- .agents/skills/haos-memory-triple/SKILL.md
+- .agents/skills/haos-query-expansion/SKILL.md
+- .agents/skills/haos-rag-corpus-oficial/SKILL.md
+- .agents/skills/haos-research-report-writer/SKILL.md
+- .agents/skills/haos-source-quality-auditor/SKILL.md
+- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/json-canvas/SKILL.md
+- .agents/skills/last30days-skill/SKILL.md
+- .agents/skills/ler-pdf-local/SKILL.md
+- .agents/skills/lovable-publisher/SKILL.md
+- .agents/skills/media-kit-builder/SKILL.md
+- .agents/skills/mega-brain/SKILL.md
+- .agents/skills/miro-board-builder/SKILL.md
+- .agents/skills/mnemoverse-codex/SKILL.md
+- .agents/skills/obsidian-bases/SKILL.md
+- .agents/skills/obsidian-cli/SKILL.md
+- .agents/skills/obsidian-markdown/SKILL.md
+- .agents/skills/obsidian-organizer/SKILL.md
+- .agents/skills/pretty-links/SKILL.md
+- .agents/skills/second-opinion/SKILL.md
+- .agents/skills/tiktok-creative-playbook/SKILL.md
 A matriz declara capacidades; nao executa skills nem concede permissoes.
 Se perfil, skill ou caminho estiver ausente ou divergente, informe ao main;
 nao invente rota, instale dependencia ou altere a matriz para ocultar a lacuna.

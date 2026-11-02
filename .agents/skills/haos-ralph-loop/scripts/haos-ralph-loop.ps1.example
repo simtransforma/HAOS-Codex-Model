@@ -1,0 +1,385 @@
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$Cwd,
+
+    [string]$Objective,
+
+    [string[]]$AcceptanceCriteria = @(),
+
+    [string[]]$ValidateCommand = @(),
+
+    [int]$MaxIterations = 8,
+
+    [int]$MaxConsecutiveFailures = 2,
+
+    [int]$MaxStagnantIterations = 3,
+
+    [int]$HardTimeoutSeconds = 1800,
+
+    [string]$Model,
+
+    [string]$CodexBinary = 'codex',
+
+    [string]$StateDir,
+
+    [string]$StopFile,
+
+    [switch]$Resume,
+
+    [switch]$DryRun,
+
+    [switch]$Run
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+function Assert-Condition {
+    param([bool]$Condition, [string]$Message)
+    if (-not $Condition) { throw $Message }
+}
+
+function Write-${RESOURCE_ID} {
+    param([string]$Path, [string]$Content)
+    $parent = Split-Path -Parent $Path
+    if (-not (Test-Path -LiteralPath $parent)) {
+        New-Item -ItemType Directory -Force -Path $parent | Out-Null
+    }
+    [System.IO.File]::WriteAllText($Path, $Content, [System.Text.${RESOURCE_ID}]::new($false))
+}
+
+function Read-${RESOURCE_ID} {
+    param([string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) { return '' }
+    return [System.IO.File]::ReadAllText($Path, [System.Text.${RESOURCE_ID}]::new($false))
+}
+
+function Save-Json {
+    param([string]$Path, $Value)
+    $json = $Value | ConvertTo-Json -Depth 8
+    Write-${RESOURCE_ID} -Path $Path -Content $json
+}
+
+function Read-JsonFile {
+    param([string]$Path)
+    $raw = Read-${RESOURCE_ID} -Path $Path
+    Assert-Condition -Condition (-not [string]::IsNullOrWhiteSpace($raw)) -Message "Missing or empty JSON result: $Path"
+    try { return $raw | ConvertFrom-Json } catch { throw "Invalid JSON result at ${Path}: $($_.Exception.Message)" }
+}
+
+function Get-JsonSchema {
+    param([ValidateSet('work', 'review')][string]$Phase)
+    if ($Phase -eq 'work') {
+        return @{
+            type = 'object'
+            additionalProperties = $false
+            # Structured Outputs requires every declared property to appear in
+            # required. Non-applicable diagnostic fields are returned as "".
+            required = @('status', 'assessment', 'evidence', 'next_step', 'blocker_reason', 'no_change_justification')
+            properties = @{
+                status = @{ type = 'string'; enum = @('IN_PROGRESS', 'BLOCKED', 'COMPLETE') }
+                assessment = @{ type = 'string'; minLength = 1 }
+                evidence = @{ type = 'array'; minItems = 1; items = @{ type = 'string'; minLength = 1 } }
+                next_step = @{ type = 'string'; minLength = 1 }
+                blocker_reason = @{ type = 'string' }
+                no_change_justification = @{ type = 'string' }
+            }
+        }
+    }
+    return @{
+        type = 'object'
+        additionalProperties = $false
+        required = @('decision', 'assessment', 'feedback', 'evidence')
+        properties = @{
+            decision = @{ type = 'string'; enum = @('SHIP', 'REVISE', 'BLOCKED') }
+            assessment = @{ type = 'string'; minLength = 1 }
+            feedback = @{ type = 'string'; minLength = 1 }
+            evidence = @{ type = 'array'; minItems = 1; items = @{ type = 'string'; minLength = 1 } }
+        }
+    }
+}
+
+function Invoke-Process {
+    param(
+        [string]$FileName,
+        [string[]]$Arguments,
+        [string]$WorkingDirectory,
+        [int]$TimeoutSeconds
+    )
+
+    $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $startInfo.FileName = $FileName
+    $startInfo.WorkingDirectory = $WorkingDirectory
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    # The prompt is passed as an argument. Redirecting stdin makes newer Codex
+    # builds wait for an additional stdin block before starting the task.
+    $startInfo.RedirectStandardInput = $false
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    foreach ($argument in $Arguments) { [void]$startInfo.ArgumentList.Add($argument) }
+
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $startInfo
+    Assert-Condition -Condition $process.Start() -Message "Could not start: $FileName"
+    $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+    $stderrTask = $process.StandardError.ReadToEndAsync()
+    $completed = $process.WaitForExit([Math]::Max(1, $TimeoutSeconds) * 1000)
+    if (-not $completed) {
+        try { $process.Kill($true) } catch { }
+        $process.WaitForExit()
+    }
+    [System.Threading.Tasks.Task]::WaitAll(@($stdoutTask, $stderrTask))
+    return [pscustomobject]@{
+        TimedOut = -not $completed
+        ExitCode = if ($completed) { $process.ExitCode } else { -1 }
+        StdOut = $stdoutTask.Result
+        StdErr = $stderrTask.Result
+    }
+}
+
+function Get-ShortText {
+    param([string]$Text, [int]$MaxChars = 900)
+    $normalized = ($Text -replace "`r?`n", ' ' -replace '\s+', ' ').Trim()
+    if ($normalized.Length -le $MaxChars) { return $normalized }
+    return $normalized.Substring(0, $MaxChars) + ' ...'
+}
+
+function Invoke-Validation {
+    param([int]$Iteration, [string[]]$Commands, [string]$WorkingDirectory, [int]$TimeoutSeconds, [string]$ValidationDir)
+    if ($Commands.Count -eq 0) {
+        return [pscustomobject]@{ Passed = $true; Summary = 'No validation command configured.' }
+    }
+    $records = @()
+    $index = 0
+    foreach ($command in $Commands) {
+        $index++
+        $result = Invoke-Process -FileName 'cmd.exe' -Arguments @('/d', '/c', $command) -WorkingDirectory $WorkingDirectory -TimeoutSeconds $TimeoutSeconds
+        $record = [ordered]@{
+            iteration = $Iteration
+            command = $command
+            passed = (-not $result.TimedOut -and $result.ExitCode -eq 0)
+            timed_out = $result.TimedOut
+            exit_code = $result.ExitCode
+            output = Get-ShortText -Text ($result.StdOut + "`n" + $result.StdErr)
+        }
+        Save-Json -Path (Join-Path $ValidationDir ("iteration-{0:D3}-check-{1:D2}.json" -f $Iteration, $index)) -Value $record
+        $records += [pscustomobject]$record
+    }
+    $failed = @($records | Where-Object { -not $_.passed })
+    if ($failed.Count -eq 0) {
+        return [pscustomobject]@{ Passed = $true; Summary = "$($records.Count) validation command(s) passed." }
+    }
+    return [pscustomobject]@{ Passed = $false; Summary = "$($failed.Count) of $($records.Count) validation command(s) failed." }
+}
+
+function Get-ContentHash {
+    param([string[]]$Parts)
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes(($Parts -join "`n---`n"))
+    $hash = [System.Security.Cryptography.SHA256]::HashData($bytes)
+    return [Convert]::ToHexString($hash)
+}
+
+function Append-History {
+    param([string]$HistoryFile, [int]$Iteration, [string]$WorkStatus, [string]$ReviewDecision, [bool]$ValidationPassed, [string]$Note)
+    $validation = if ($ValidationPassed) { 'PASS' } else { 'FAIL' }
+    Add-Content -LiteralPath $HistoryFile -Value ("| {0} | {1} | {2} | {3} | {4} |" -f $Iteration, $WorkStatus, $ReviewDecision, $validation, $Note) -Encoding utf8
+}
+
+$cwdPath = (Resolve-Path -LiteralPath $Cwd -ErrorAction Stop).Path
+Assert-Condition -Condition (Test-Path -LiteralPath (Join-Path $cwdPath '.git')) -Message 'The target must be a Git repository. Use a repository rather than a broad filesystem directory.'
+Assert-Condition -Condition ($MaxIterations -ge 1 -and $MaxIterations -le 40) -Message 'MaxIterations must be between 1 and 40.'
+Assert-Condition -Condition ($MaxConsecutiveFailures -ge 1 -and $MaxConsecutiveFailures -le 10) -Message 'MaxConsecutiveFailures must be between 1 and 10.'
+Assert-Condition -Condition ($MaxStagnantIterations -ge 1 -and $MaxStagnantIterations -le 10) -Message 'MaxStagnantIterations must be between 1 and 10.'
+Assert-Condition -Condition ($HardTimeoutSeconds -ge 60 -and $HardTimeoutSeconds -le 7200) -Message 'HardTimeoutSeconds must be between 60 and 7200.'
+Assert-Condition -Condition ($null -ne (Get-Command $CodexBinary -ErrorAction SilentlyContinue)) -Message "Codex executable was not found: $CodexBinary"
+
+if ([string]::IsNullOrWhiteSpace($StateDir)) { $StateDir = Join-Path $cwdPath '.codex\haos-ralph-loop' }
+if ([string]::IsNullOrWhiteSpace($StopFile)) { $StopFile = Join-Path $StateDir 'STOP' }
+$stateFile = Join-Path $StateDir 'state.json'
+$objectiveFile = Join-Path $StateDir 'objective.md'
+$acceptanceFile = Join-Path $StateDir 'acceptance-criteria.md'
+$feedbackFile = Join-Path $StateDir 'feedback.md'
+$historyFile = Join-Path $StateDir 'iteration-history.md'
+$summaryFile = Join-Path $StateDir 'run-summary.md'
+$blockedFile = Join-Path $StateDir 'RALPH-BLOCKED.md'
+$completeFile = Join-Path $StateDir '.ralph-complete'
+$validationDir = Join-Path $StateDir 'validation'
+$workSchemaFile = Join-Path $StateDir 'work-schema.json'
+$reviewSchemaFile = Join-Path $StateDir 'review-schema.json'
+
+if ($Resume) {
+    Assert-Condition -Condition (Test-Path -LiteralPath $stateFile) -Message "No saved loop exists at $StateDir."
+    if ([string]::IsNullOrWhiteSpace($Objective)) { $Objective = (Read-${RESOURCE_ID} -Path $objectiveFile).Trim() }
+    if ($AcceptanceCriteria.Count -eq 0) {
+        $AcceptanceCriteria = @(Get-Content -LiteralPath $acceptanceFile -ErrorAction Stop | Where-Object { $_ -match '^\s*-\s+' } | ForEach-Object { $_ -replace '^\s*-\s+', '' })
+    }
+}
+
+Assert-Condition -Condition (-not [string]::IsNullOrWhiteSpace($Objective)) -Message 'Objective is required.'
+Assert-Condition -Condition ($AcceptanceCriteria.Count -gt 0) -Message 'At least one acceptance criterion is required.'
+
+$effective = [ordered]@{
+    cwd = $cwdPath
+    state_dir = $StateDir
+    max_iterations = $MaxIterations
+    max_consecutive_failures = $MaxConsecutiveFailures
+    max_stagnant_iterations = $MaxStagnantIterations
+    hard_timeout_seconds = $HardTimeoutSeconds
+    worker_sandbox = 'workspace-write'
+    reviewer_sandbox = 'read-only'
+    validation_commands = $ValidateCommand.Count
+    dangerous_bypass = $false
+    automatic_commit_or_push = $false
+}
+
+if ($DryRun) {
+    $effective | ConvertTo-Json -Depth 5
+    return
+}
+Assert-Condition -Condition $Run -Message 'Use -DryRun to inspect the configuration or -Run to start the loop.'
+
+New-Item -ItemType Directory -Force -Path $StateDir, $validationDir | Out-Null
+Write-${RESOURCE_ID} -Path $objectiveFile -Content $Objective.Trim()
+Write-${RESOURCE_ID} -Path $acceptanceFile -Content ((@('# Acceptance criteria') + ($AcceptanceCriteria | ForEach-Object { "- $_" })) -join "`n")
+if (-not (Test-Path -LiteralPath $feedbackFile)) { Write-${RESOURCE_ID} -Path $feedbackFile -Content '# Operator feedback' }
+if (-not (Test-Path -LiteralPath $historyFile)) {
+    Write-${RESOURCE_ID} -Path $historyFile -Content "# HAOS Ralph Loop history`n`n| Iteration | Worker | Reviewer | Validation | Note |`n|---:|---|---|---|---|"
+}
+Save-Json -Path $workSchemaFile -Value (Get-JsonSchema -Phase work)
+Save-Json -Path $reviewSchemaFile -Value (Get-JsonSchema -Phase review)
+Remove-Item -LiteralPath $completeFile -Force -ErrorAction SilentlyContinue
+
+$state = if ($Resume) { Read-JsonFile -Path $stateFile } else { [pscustomobject]@{ iteration = 1; consecutive_failures = 0; stagnant_iterations = 0; last_hash = ''; created_at = [DateTimeOffset]::UtcNow.ToString('o') } }
+$iteration = [int]$state.iteration
+$consecutiveFailures = [int]$state.consecutive_failures
+$stagnantIterations = [int]$state.stagnant_iterations
+$lastHash = [string]$state.last_hash
+$stopReason = ''
+
+while ($iteration -le $MaxIterations) {
+    if (Test-Path -LiteralPath $StopFile) { $stopReason = 'stop_file_detected'; break }
+    $feedback = Read-${RESOURCE_ID} -Path $feedbackFile
+    $workResultFile = Join-Path $StateDir ("work-result-{0:D3}.json" -f $iteration)
+    $reviewResultFile = Join-Path $StateDir ("review-result-{0:D3}.json" -f $iteration)
+
+    $workPrompt = @"
+You are the worker in a bounded HAOS Ralph Loop.
+Objective:
+$Objective
+
+Acceptance criteria:
+$($AcceptanceCriteria | ForEach-Object { "- $_" } | Out-String)
+Operator feedback:
+$feedback
+
+Work only inside the current repository. Do not commit, push, deploy, send messages, spend money, change remote infrastructure, or bypass approvals/sandboxing. If any such action is required, return BLOCKED with evidence. Implement the next highest-impact safe change and run relevant local checks. Your final response must match the supplied JSON schema exactly. Use COMPLETE only when every acceptance criterion is met with concrete evidence.
+"@
+    $workArgs = @('exec', '-C', $cwdPath, '--sandbox', 'workspace-write', '--output-schema', $workSchemaFile, '--output-last-message', $workResultFile, '--json')
+    if (-not [string]::IsNullOrWhiteSpace($Model)) { $workArgs += @('--model', $Model) }
+    # cmd.exe truncates multiline positional arguments passed through codex.cmd.
+    $workArgs += (($workPrompt -replace '\s+', ' ').Trim())
+    $workRun = Invoke-Process -FileName $CodexBinary -Arguments $workArgs -WorkingDirectory $cwdPath -TimeoutSeconds $HardTimeoutSeconds
+    if ($workRun.TimedOut -or $workRun.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $workResultFile)) {
+        $consecutiveFailures++
+        $note = if ($workRun.TimedOut) { 'worker timeout' } else { "worker failed: $(Get-ShortText -Text $workRun.StdErr -MaxChars 180)" }
+        Append-History -HistoryFile $historyFile -Iteration $iteration -WorkStatus 'ERROR' -ReviewDecision 'SKIPPED' -ValidationPassed $false -Note $note
+        if ($consecutiveFailures -ge $MaxConsecutiveFailures) { $stopReason = 'max_consecutive_failures_reached'; break }
+        $iteration++
+        continue
+    }
+
+    try { $work = Read-JsonFile -Path $workResultFile } catch {
+        $consecutiveFailures++
+        Append-History -HistoryFile $historyFile -Iteration $iteration -WorkStatus 'INVALID' -ReviewDecision 'SKIPPED' -ValidationPassed $false -Note 'worker JSON schema/result invalid'
+        if ($consecutiveFailures -ge $MaxConsecutiveFailures) { $stopReason = 'max_consecutive_failures_reached'; break }
+        $iteration++
+        continue
+    }
+
+    $validation = Invoke-Validation -Iteration $iteration -Commands $ValidateCommand -WorkingDirectory $cwdPath -TimeoutSeconds $HardTimeoutSeconds -ValidationDir $validationDir
+    $reviewPrompt = @"
+You are the independent reviewer in a bounded HAOS Ralph Loop. You have read-only access.
+Objective:
+$Objective
+
+Acceptance criteria:
+$($AcceptanceCriteria | ForEach-Object { "- $_" } | Out-String)
+Worker result:
+$(Get-Content -Raw -LiteralPath $workResultFile)
+
+Validation status: $($validation.Summary)
+Review the current repository and evidence. Do not edit files or approve external actions. Return SHIP only if the worker is COMPLETE, every criterion is demonstrably met, and validation passed. Return BLOCKED only for a real, evidenced blocker. Your final response must match the supplied JSON schema exactly.
+"@
+    $reviewArgs = @('exec', '-C', $cwdPath, '--sandbox', 'read-only', '--output-schema', $reviewSchemaFile, '--output-last-message', $reviewResultFile, '--json')
+    if (-not [string]::IsNullOrWhiteSpace($Model)) { $reviewArgs += @('--model', $Model) }
+    $reviewArgs += (($reviewPrompt -replace '\s+', ' ').Trim())
+    $reviewRun = Invoke-Process -FileName $CodexBinary -Arguments $reviewArgs -WorkingDirectory $cwdPath -TimeoutSeconds $HardTimeoutSeconds
+    if ($reviewRun.TimedOut -or $reviewRun.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $reviewResultFile)) {
+        $consecutiveFailures++
+        $note = if ($reviewRun.TimedOut) { 'reviewer timeout' } else { "reviewer failed: $(Get-ShortText -Text $reviewRun.StdErr -MaxChars 180)" }
+        Append-History -HistoryFile $historyFile -Iteration $iteration -WorkStatus $work.status -ReviewDecision 'ERROR' -ValidationPassed $validation.Passed -Note $note
+        if ($consecutiveFailures -ge $MaxConsecutiveFailures) { $stopReason = 'max_consecutive_failures_reached'; break }
+        $iteration++
+        continue
+    }
+
+    try { $review = Read-JsonFile -Path $reviewResultFile } catch {
+        $consecutiveFailures++
+        Append-History -HistoryFile $historyFile -Iteration $iteration -WorkStatus $work.status -ReviewDecision 'INVALID' -ValidationPassed $validation.Passed -Note 'review JSON schema/result invalid'
+        if ($consecutiveFailures -ge $MaxConsecutiveFailures) { $stopReason = 'max_consecutive_failures_reached'; break }
+        $iteration++
+        continue
+    }
+
+    $consecutiveFailures = 0
+    $resultHash = Get-ContentHash -Parts @((Get-Content -Raw -LiteralPath $workResultFile), (Get-Content -Raw -LiteralPath $reviewResultFile), $validation.Summary)
+    if ($resultHash -eq $lastHash) { $stagnantIterations++ } else { $stagnantIterations = 0 }
+    $lastHash = $resultHash
+
+    $note = 'continue'
+    if ($work.status -eq 'COMPLETE' -and $review.decision -eq 'SHIP' -and $validation.Passed) {
+        $stopReason = 'task_complete'
+        $note = 'complete'
+        Write-${RESOURCE_ID} -Path $completeFile -Content "Completed at $([DateTimeOffset]::UtcNow.ToString('o'))"
+    } elseif ($work.status -eq 'BLOCKED' -and $review.decision -eq 'BLOCKED') {
+        $stopReason = 'task_blocked'
+        $note = 'blocked'
+        Write-${RESOURCE_ID} -Path $blockedFile -Content ("# Ralph loop blocked`n`n$($work.blocker_reason)`n`nReviewer:`n$($review.feedback)")
+    }
+    Append-History -HistoryFile $historyFile -Iteration $iteration -WorkStatus $work.status -ReviewDecision $review.decision -ValidationPassed $validation.Passed -Note $note
+
+    $state = [ordered]@{
+        iteration = $iteration + 1
+        consecutive_failures = $consecutiveFailures
+        stagnant_iterations = $stagnantIterations
+        last_hash = $lastHash
+        updated_at = [DateTimeOffset]::UtcNow.ToString('o')
+        last_worker_status = $work.status
+        last_reviewer_decision = $review.decision
+        last_validation_passed = $validation.Passed
+    }
+    Save-Json -Path $stateFile -Value $state
+    if ($stopReason) { break }
+    if ($stagnantIterations -ge $MaxStagnantIterations) { $stopReason = 'max_stagnant_iterations_reached'; break }
+    $iteration++
+}
+
+if (-not $stopReason) { $stopReason = 'max_iterations_reached' }
+$summary = @"
+# HAOS Ralph Loop summary
+
+- Stop reason: $stopReason
+- Repository: $cwdPath
+- Last completed iteration: $iteration
+- Worker sandbox: workspace-write
+- Reviewer sandbox: read-only
+- Automatic commit/push: false
+- Dangerous bypass: false
+
+Read `iteration-history.md`, the latest `work-result-*.json`, `review-result-*.json`, and `validation/` before treating this run as complete.
+"@
+Write-${RESOURCE_ID} -Path $summaryFile -Content $summary
+Write-Output ("HAOS Ralph Loop stopped: {0}" -f $stopReason)
+Write-Output ("Summary: {0}" -f $summaryFile)

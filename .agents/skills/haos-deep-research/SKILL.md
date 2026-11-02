@@ -68,3 +68,8 @@ escopo nem transforme pesquisa em operacao externa.
 - Fonte antiga contradiz revisao recente: comparar periodo e metodo, explicar a mudanca.
 - Prazo termina com claim central sem fonte: entregar parcial, com claim inconclusivo.
 - Rede indisponivel: identificar fontes locais lidas e nao alegar atualidade externa.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

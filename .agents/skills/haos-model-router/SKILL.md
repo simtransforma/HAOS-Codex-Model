@@ -77,3 +77,8 @@ ou alegacao de hot reload. `haos-router` escolhe o fluxo; esta skill aconselha.
   e EFETIVO NAO INFORMADO.
 - Tarefa C0 e matriz recomenda squad: responder diretamente; recomendacao
   declarativa nao cria necessidade de agentes.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

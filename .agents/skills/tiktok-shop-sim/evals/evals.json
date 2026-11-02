@@ -1,0 +1,30 @@
+{
+  "skill_name": "tiktok-shop-sim",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "quanto o tiktok shop vendeu esse mes? e quanto o tiktok mordeu de comissao real? me da os numeros certinhos",
+      "expected_output": "Numeros reais do banco: vendas pagas tiktok_shop do mes (count + R$ bruto), comissao real (taxa_plataforma origem real_tiktok) e explicacao do lag de liquidacao (taxa pendente)",
+      "files": [],
+      "assertions": [
+        "resposta.md existe e responde em PT-BR com numeros concretos (R$)",
+        "traz o BRUTO do mes corrente da plataforma tiktok_shop consultado do banco (nao inventado)",
+        "traz a comissao/taxa real e explica que parte das vendas ainda nao liquidou (lag 1-2 semanas) OU mostra a taxa real s\u00f3 dos liquidados",
+        "nenhum token/segredo/PII exposto"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "verifica se a integracao do tiktok shop ta saudavel: token valido, cron rodando, dados atualizados, webhook recebendo",
+      "expected_output": "Health check com: validade/expiracao do token (sem expor valor), estado da tarefa agendada SIM-Dash TikTok Diario, frescor de raw.tiktok_orders/settlements, e contagem/ultimo evento do webhook source tiktok_shop",
+      "files": [],
+      "assertions": [
+        "resposta.md existe com veredito claro (saudavel ou nao) e evidencias",
+        "cobre o TOKEN (validade/expiracao, sem expor o valor)",
+        "cobre o CRON (tarefa SIM-Dash TikTok Diario ou equivalente) e o frescor dos dados no banco",
+        "cobre o WEBHOOK (eventos recebidos source tiktok_shop)",
+        "nenhum token/segredo/PII exposto"
+      ]
+    }
+  ]
+}

@@ -9,11 +9,24 @@ Consulte .codex/skill-routing.json em agents.content-strategist.skills.
 Defaults comuns: haos-evidence e haos-superpowers. Antes de agir, leia os
 SKILL.md indicados pertinentes a tarefa; metadados nao substituem leitura.
 Rotas relativas a raiz do repositorio:
-- .agents/skills/haos-evidence/SKILL.md
-- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/ai-seo/SKILL.md
+- .agents/skills/amazon-seller/SKILL.md
 - .agents/skills/haos-copy/SKILL.md
 - .agents/skills/haos-deep-research/SKILL.md
+- .agents/skills/haos-evidence/SKILL.md
 - .agents/skills/haos-source-quality-auditor/SKILL.md
+- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/interpretar-video/SKILL.md
+- .agents/skills/launch/SKILL.md
+- .agents/skills/marketing-expert/SKILL.md
+- .agents/skills/marketing-ideas/SKILL.md
+- .agents/skills/marketing-psychology/SKILL.md
+- .agents/skills/seo-optimizer/SKILL.md
+- .agents/skills/tiktok-shop-fundamentals/SKILL.md
+- .agents/skills/tiktok-shop-sim/SKILL.md
+- .agents/skills/youtube-content-generator/SKILL.md
+- .agents/skills/youtube-media-kit-generator/SKILL.md
+- .agents/skills/youtube-seo/SKILL.md
 A matriz declara capacidades; nao executa skills nem concede permissoes.
 Se perfil, skill ou caminho estiver ausente ou divergente, informe ao main;
 nao invente rota, instale dependencia ou altere a matriz para ocultar a lacuna.

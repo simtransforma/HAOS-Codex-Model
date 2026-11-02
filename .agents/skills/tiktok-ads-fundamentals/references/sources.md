@@ -1,0 +1,154 @@
+# TikTok Ads — Fontes consultadas (mai/2026)
+
+## Oficiais TikTok
+- TikTok Ads Structure: https://ads.tiktok.com/help/article/tiktok-ads-structure?lang=en
+- Choose the Right Objective: https://ads.tiktok.com/help/article/choose-right-objective
+- Sales objective: https://ads.tiktok.com/help/article/sales-advertising-objective-tiktok
+- Community Interaction objective: https://ads.tiktok.com/help/article/community-interaction-objective?lang=en
+- Available Optimization objectives: https://ads.tiktok.com/help/article/available-optimization-objectives?lang=en
+- About Smart+ Campaigns: https://ads.tiktok.com/help/article/about-smart-plus-campaign?lang=en
+- Smart+ Web: https://ads.tiktok.com/help/article/about-smart-plus-web-campaigns
+- Smart+ App: https://ads.tiktok.com/help/article/about-smart-plus-app-campaigns
+- Smart+ Upgraded Experience: https://ads.tiktok.com/help/article/about-updates-to-smart-plus?lang=en
+- Create Upgraded Smart+: https://ads.tiktok.com/help/article/how-to-create-a-campaign-in-the-upgraded-smart-experience
+- Auto-selected creatives for Smart+: https://ads.tiktok.com/help/article/about-auto-selected-creatives
+- Product GMV Max: https://ads.tiktok.com/help/article/about-product-gmv-max
+- GMV Max Guidelines: https://ads.tiktok.com/help/article/gmv-max-guidelines?lang=en
+- Create Product GMV Max: https://ads.tiktok.com/help/article/how-to-create-a-product-gmv-max-campaign-in-tiktok-ads-manager
+- GMV Max migration: https://ads.tiktok.com/help/article/gmv-max-migration-tiktok-shop-ads
+- Available Bidding Strategies: https://ads.tiktok.com/help/article/bidding-strategies
+- Bidding best practices: https://ads.tiktok.com/help/article/best-practices-for-bidding-strategies
+- VBO bidding compared: https://ads.tiktok.com/help/article/available-value-based-optimization-bidding-strategies-compared?lang=en
+- Ad Targeting Dimensions: https://ads.tiktok.com/help/article/ad-targeting
+- Interest Targeting: https://ads.tiktok.com/help/article/interest-targeting
+- Audience Insights: https://ads.tiktok.com/help/article/audience-insights?lang=en
+- Custom Audiences: https://ads.tiktok.com/help/article/custom-audiences
+- Engagement audiences: https://ads.tiktok.com/help/article/engagement?lang=en
+- Website Traffic audience: https://ads.tiktok.com/help/article/how-to-create-a-website-traffic-audience
+- App Activity Audience: https://ads.tiktok.com/help/article/how-to-create-an-app-activity-audience
+- Lead Generation Audience: https://ads.tiktok.com/help/article/lead-generation-audience?lang=en
+- Shop Activity Audience: https://ads.tiktok.com/help/article/create-shop-activity-audience
+- Customer File audiences: https://ads.tiktok.com/help/article/customer-file
+- CA Enhancement: https://ads.tiktok.com/help/article/custom-audience-enhancement?lang=en
+- Standard Events & Parameters: https://ads.tiktok.com/help/article/standard-events-parameters?lang=en
+- Events API: https://ads.tiktok.com/help/article/events-api
+- Event Deduplication: https://ads.tiktok.com/help/article/event-deduplication?lang=en
+- Advanced Matching Web: https://ads.tiktok.com/help/article/advanced-matching-web
+- Auto Advanced Matching: https://ads.tiktok.com/help/article/how-to-set-up-automatic-advanced-matching?lang=en
+- Matching events CAPI: https://ads.tiktok.com/help/article/how-to-set-up-matching-events-with-events-api?lang=en
+- Attribution window: https://ads.tiktok.com/help/article/about-the-attribution-window-on-tiktok-ads-manager
+- Attribution Overview: https://ads.tiktok.com/help/article/attribution-overview?lang=en
+- Attribution Manager: https://ads.tiktok.com/help/article/attribution-manager?redirected=2
+- Performance Comparison: https://ads.tiktok.com/help/article/about-attribution-analytics-performance-comparison?lang=en
+- LIVE Shopping Ads attribution: https://ads.tiktok.com/help/article/about-attribution-windows-for-live-shopping-ads?lang=en
+- Attribution at Ad Group level: https://ads.tiktok.com/help/article/attribution-settings-at-the-ad-group-level?lang=en
+- Conversion Lift Study: https://ads.tiktok.com/help/article/about-conversion-lift-study?lang=en
+- About Spark Ads: https://ads.tiktok.com/help/article/spark-ads
+- Spark Ads creation guide: https://ads.tiktok.com/help/article/spark-ads-creation-guide
+- Branded Effect specs: https://ads.tiktok.com/help/article/tiktok-branded-effect-asset-commercial-benefits-specs?lang=en
+- Carousel Ads specs: https://ads.tiktok.com/help/article/specifications-for-carousel-ads
+- Standard Carousel vs VSA Carousel: https://ads.tiktok.com/help/article/about-the-differences-between-standard-carousel-and-video-shopping-ads
+- TopView: https://ads.tiktok.com/help/article/about-topview?lang=en
+- TopView specs: https://ads.tiktok.com/help/article/tiktok-reservation-topview
+- Split Testing: https://ads.tiktok.com/help/article/split-testing?lang=en
+- Split Testing Variables: https://ads.tiktok.com/help/article/split-testing-variables?lang=en
+- Learning Phase: https://ads.tiktok.com/help/article/learning-phase
+- Learning Phase FAQ: https://ads.tiktok.com/help/article/learning-phase-faq
+- AEO best practices: https://ads.tiktok.com/help/article/best-practices-for-app-event-optimization
+- iOS 14 Performance & Reporting: https://ads.tiktok.com/help/article/performance-reporting-considerations-ios14-dedicated-campaigns?lang=en
+- SKAN 4.0: https://ads.tiktok.com/help/article/about-skan-4-0-and-tiktok?lang=en
+- iOS 14+ Bidding considerations: https://ads.tiktok.com/help/article/bidding-optimization-considerations-ios14?lang=en
+- Video play metrics: https://ads.tiktok.com/help/article/video-play?lang=en
+- All metrics: https://ads.tiktok.com/help/article/all-metrics?lang=en
+- BC roles & permissions: https://ads.tiktok.com/help/article/about-business-center-roles-and-permissions?lang=en
+- Asset-level permissions: https://ads.tiktok.com/help/article/how-to-assign-asset-level-permissions?lang=en
+- About assets and asset permissions: https://ads.tiktok.com/help/article/about-assets-and-asset-level-permissions
+- Add BC members: https://ads.tiktok.com/help/article/add-users-tiktok-business-center
+- Available regions for ad account creation: https://ads.tiktok.com/help/article/available-countries-and-regions-for-ad-account-creation-in-bc
+- Get started TikTok Ads Brazil (PT): https://getstarted.tiktok.com/br-brand?lang=pt
+- TikTok Advertising Policies: https://ads.tiktok.com/help/article/tiktok-advertising-policies
+- Industry Entry overview: https://ads.tiktok.com/help/article/tiktok-advertising-policies-industry-entry?redirected=2
+- Industry Entry LATAM: https://ads.tiktok.com/help/article/tiktok-advertising-policies-industry-entry-latin-america?lang=en
+- Gambling & Games policy: https://ads.tiktok.com/help/article/tiktok-ads-policy-gambling-and-games
+- Healthcare & Pharma BR (PT): https://ads.tiktok.com/help/article/tiktok-ads-policy-healthcare-pharmaceuticals?lang=pt
+- Dangerous Products BR (PT): https://ads.tiktok.com/help/article/tiktok-ads-policy-dangerous-products-or-services?lang=pt
+- Branded Content Policy: https://www.tiktok.com/legal/page/global/bc-policy/en
+- Regulated Goods BR (PT): https://www.tiktok.com/community-guidelines/pt-BR/regulated-commercial-activities
+- One Click Appeal: https://ads.tiktok.com/help/article/one-click-appeal-for-other-ad-types?lang=en
+- One Click Appeal Shop Ads: https://ads.tiktok.com/help/article/appeal-rejected-ad-with-one-click-appeal-for-shopping-ads?lang=en
+- Ad Review FAQ: https://ads.tiktok.com/help/article/ad-review-faq
+- About API for Business: https://ads.tiktok.com/help/article/marketing-api?lang=en
+- API for Business portal: https://business-api.tiktok.com/portal
+- Rate limits TikTok One API: https://business-api.tiktok.com/portal/docs/rate-limits-for-tto-api/v1.3
+- Marketing API Authorization FAQ: https://business-api.tiktok.com/portal/docs/marketing-api-authorization-faqs/v1.3
+- TikTok API Authorization / Access Management: https://developers.tiktok.com/doc/oauth-user-access-token-management
+- TikTok Business API SDK (GitHub): https://github.com/tiktok/tiktok-business-api-sdk
+- TikTok Ad Report API: https://developers.tiktok.com/doc/commercial-content-api-get-ad-report
+- Beyond The Click: https://ads.tiktok.com/business/en/blog/beyond-click-attribution-views-impact-purchase
+- TransUnion meta-analysis: https://ads.tiktok.com/business/en-US/blog/transunion-meta-analysis-incremental-sales
+- TikTok Creator Marketplace: https://support.tiktok.com/en/business-and-creator/tiktok-creator-marketplace/what-is-tiktok-creator-marketplace
+- Instant Form: https://ads.tiktok.com/help/article/build-instant-form
+- Lead Gen Instant Form: https://ads.tiktok.com/help/article/set-up-lead-generation-with-instant-form?lang=en
+- CRM integrations lead gen: https://ads.tiktok.com/help/article/available-crm-integrations-tiktok-lead-generation?lang=en
+- Salesforce CRM integration: https://ads.tiktok.com/help/article/how-to-integrate-tiktok-lead-gen-with-salesforce-sales-cloud
+- Lead Gen LeadsBridge: https://ads.tiktok.com/help/article/integrate-tiktok-lead-generation-leadsbridge
+- Smart+ Catalog Ads: https://ads.tiktok.com/help/article/how-to-create-video-shopping-ads-catalog
+
+## Secundárias / referência
+- TikTok Ad Specs 2026 — AdManage.ai: https://service.example.invalid
+- Insense — Ads Specs 2026: https://service.example.invalid
+- Insense — Spark Ads 2026: https://service.example.invalid
+- Triple Whale — Benchmarks by Industry: https://service.example.invalid
+- Triple Whale — Ad Specs 2025: https://service.example.invalid
+- Wordstream — Bidding Strategies: https://service.example.invalid
+- Stackmatix — Ads Manager Tutorial 2026: https://service.example.invalid
+- Stackmatix — Targeting Options 2026: https://service.example.invalid
+- Stackmatix — AB Testing Guide: https://service.example.invalid
+- Stackmatix — TopView Guide: https://service.example.invalid
+- Stackmatix — Ads vs Facebook 2026: https://service.example.invalid
+- Stackmatix — Ads vs Instagram 2026: https://service.example.invalid
+- Stackmatix — Ad Formats 2026: https://service.example.invalid
+- Stackmatix — Creator Marketplace Guide: https://service.example.invalid
+- TikAdSuite — Ads Manager Guide 2026: https://service.example.invalid
+- TikAdSuite — BC vs Ads Manager 2026: https://service.example.invalid
+- TikAdSuite — Carousel Guide: https://service.example.invalid
+- TikAdSuite — CPM Rates 2026: https://service.example.invalid
+- TikAdSuite — Benchmarks 2026: https://service.example.invalid
+- TikAdSuite — Bidding Strategies: https://service.example.invalid
+- TikAdSuite — Appeal Rejections: https://service.example.invalid
+- TikAdSuite — GMV Max 2026: https://service.example.invalid
+- TikAdSuite — Ads Requirements 2026: https://service.example.invalid
+- TikAdTools — Smart Performance Campaign 2026: https://service.example.invalid
+- TikAdTools — GMV Max 2026: https://service.example.invalid
+- TikAdTools — Learning Phase 2026: https://service.example.invalid
+- TikAdTools — Conversion API 2026: https://service.example.invalid
+- TikAdTools — Spark Ads 2026: https://service.example.invalid
+- TikAdTools — Attribution Windows: https://service.example.invalid
+- TikAdTools — Ad Approval: https://service.example.invalid
+- TikAdTools — Ads Policies 2026: https://service.example.invalid
+- TikAdTools — Ads Reporting: https://service.example.invalid
+- Benly — Smart+ Guide 2026: https://service.example.invalid
+- Benly — Smart+ vs Manual: https://service.example.invalid
+- Benly — Split Testing 2026: https://service.example.invalid
+- Benly — Ads Cost 2026: https://service.example.invalid
+- Benly — Ads Rejected Fix 2026: https://service.example.invalid
+- Strike Social — Video Views Metrics: https://service.example.invalid
+- Strike Social — View-Through Rate: https://service.example.invalid
+- Coinis — Policy Explained: https://service.example.invalid
+- Coinis — Engagement Rate: https://service.example.invalid
+- Coinis — Demographic Targeting: https://service.example.invalid
+- Coinis — Campaign Objective: https://service.example.invalid
+- Coinis — Server-Side Tracking: https://service.example.invalid
+- Branch — Supercharge TikTok iOS: https://service.example.invalid
+- Adjust — TikTok x Adjust real-time iOS: https://service.example.invalid
+- DataSlayer — Ads 2026 Attribution Fix: https://service.example.invalid
+- Segwise — Smart Campaigns 2026: https://service.example.invalid
+- Segwise — Dashboard Best Practices: https://service.example.invalid
+- Trendtrack — TikTok vs Meta CPM 2026: https://service.example.invalid
+- MHI Growth — Meta vs TikTok DTC 2026: https://service.example.invalid
+- DigitalApplied — Benchmarks 2026: https://service.example.invalid
+- Lebesgue — Benchmarks CTR CR CPM 2026: https://service.example.invalid
+- Shopify Brasil — TikTok Ads guia (PT): https://www.shopify.com/br/blog/tiktok-ads
+- Net Influencer — 2.35x return: https://service.example.invalid
+- Leadsie — BC for Agencies: https://service.example.invalid
+- Stormy AI — Shop Ads 2026 GMV Max: https://service.example.invalid

@@ -1,0 +1,87 @@
+{
+  "repo": "n8n-io/skills",
+  "commit": "180b8415e3b73f78828cfa01e908e67f89f2a139",
+  "license": "Apache-2.0",
+  "path": "skills/n8n-workflow-lifecycle-official",
+  "localAdaptation": "HAOS 2026-10-04; see ADAPTACAO-HAOS.md; upstream bodies include identified local corrections",
+  "upstreamFiles": [
+    {
+      "path": "LICENSE",
+      "gitBlob": "c87e50b21d7195576cfda86509960d9f80a1d3bd",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "skills/n8n-workflow-lifecycle-official/SKILL.md",
+      "gitBlob": "5c7cbab458222d9ca7de28af7276ce480b6c3372",
+      "sha256": "fb478e4c54655f6171e7bf699b720e7bdc993f4a76d94c5b562bb8a9cd358fcb"
+    },
+    {
+      "path": "skills/n8n-workflow-lifecycle-official/references/FOLDER_LIMITATIONS.md",
+      "gitBlob": "dbf2fadb17ec6f0b3f8baf729a766e592845c18f",
+      "sha256": "dc3dd131f75be47c68e7b3119eb161a93bee3f5ff7609b99c33146297d0678a9"
+    },
+    {
+      "path": "skills/n8n-workflow-lifecycle-official/references/MCP_ACCESS_PER_WORKFLOW.md",
+      "gitBlob": "6ec8f71e358dd97bf2319f053b5c1bbfe7b1f829",
+      "sha256": "a3b465cdb2e32cefb90212333f1c7444aff9760b8b4abbd895e21bea33bad0c3"
+    },
+    {
+      "path": "skills/n8n-workflow-lifecycle-official/references/NAMING_CONVENTIONS.md",
+      "gitBlob": "9fd4266f46a13553d236b20b2ed5c3b24118f3cc",
+      "sha256": "68809db8fe57c8a93dd90e8aa70d2770ae470e4e59ac3afe1f3ad3fd6c569574"
+    },
+    {
+      "path": "skills/n8n-workflow-lifecycle-official/references/REVIEW_CHECKLIST.md",
+      "gitBlob": "836f5be2f0dfc37cef92fa782f519bb92ce6f9b8",
+      "sha256": "a75598617a602ba6d18d7f7fd96c2069234fcd9463550141c45c9e1bede29334"
+    },
+    {
+      "path": "skills/n8n-workflow-lifecycle-official/references/TESTING.md",
+      "gitBlob": "a368d0f84e1aa5e9baa03a1f7ff29614155056fe",
+      "sha256": "d50577b3bf7e0d08d9bfd17022c33cd535fff38f646ee5274f26c7eb7b742ac6"
+    },
+    {
+      "path": "skills/n8n-workflow-lifecycle-official/references/VALIDATION_CHECKLIST.md",
+      "gitBlob": "f153b0c28e7eb6c6b264e33e1a0d18c1ba7ffbf7",
+      "sha256": "2752b1a2a1e8a555345a4e020a16ef294a2d2ea7ae9299f61d220ac2e3f00044"
+    }
+  ],
+  "installedFiles": [
+    {
+      "path": "ADAPTACAO-HAOS.md",
+      "sha256": "fa224947236ecbd30cf2c39618ada3bc14690df78bb5607ee9caf4b9aa9b16f1"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "references/FOLDER_LIMITATIONS.md",
+      "sha256": "78aa013ded1b995a2c80664312962fccd1898a4d5b83a18d27c8771d7d90ccf9"
+    },
+    {
+      "path": "references/MCP_ACCESS_PER_WORKFLOW.md",
+      "sha256": "def7053e0fffaf674d4c139f5984bea1c4f58ce31ff2a5e6d5842cacf61cc7fd"
+    },
+    {
+      "path": "references/NAMING_CONVENTIONS.md",
+      "sha256": "d0bacf5444bbc1d1c01531d99e44b1460332df41604736a05dc92c054a1cebe8"
+    },
+    {
+      "path": "references/REVIEW_CHECKLIST.md",
+      "sha256": "20f392238ff0bbbcbb79333c8b0d43ea29288aba0c4f73c1b44c9e3422d0bb81"
+    },
+    {
+      "path": "references/TESTING.md",
+      "sha256": "e983dad0064186a04f1f06a0b825bbd092c818587a7b8dd289b8379a2361b974"
+    },
+    {
+      "path": "references/VALIDATION_CHECKLIST.md",
+      "sha256": "e9609b10e9c7c51abb1ffc0d563a0014e9b4722f2e0392ad7c2387a8d92091c8"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "0777275c7cb3435acee344762cf97ed04ad3d339ddcf8e8690e68895b6660cc0"
+    }
+  ]
+}

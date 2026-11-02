@@ -9,10 +9,23 @@ Consulte .codex/skill-routing.json em agents.crm-specialist.skills.
 Defaults comuns: haos-evidence e haos-superpowers. Antes de agir, leia os
 SKILL.md indicados pertinentes a tarefa; metadados nao substituem leitura.
 Rotas relativas a raiz do repositorio:
+- .agents/skills/active-prospecting/SKILL.md
+- .agents/skills/churn-prevention/SKILL.md
+- .agents/skills/clean-prospect-lists/SKILL.md
+- .agents/skills/clint-api/SKILL.md
+- .agents/skills/clint-disparo-variaveis/SKILL.md
+- .agents/skills/clint-funnel-playbook/SKILL.md
+- .agents/skills/clint-global/SKILL.md
+- .agents/skills/clint-meta-audience-sync/SKILL.md
+- .agents/skills/clint-split-lotes/SKILL.md
+- .agents/skills/evolution-api/SKILL.md
 - .agents/skills/haos-evidence/SKILL.md
-- .agents/skills/haos-superpowers/SKILL.md
-- .agents/skills/haos-quality-gates/SKILL.md
 - .agents/skills/haos-memory-provenance/SKILL.md
+- .agents/skills/haos-quality-gates/SKILL.md
+- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/lia-api/SKILL.md
+- .agents/skills/limpar-lista-contatos/SKILL.md
+- .agents/skills/transcrever-audio-whatsapp/SKILL.md
 A matriz declara capacidades; nao executa skills nem concede permissoes.
 Se perfil, skill ou caminho estiver ausente ou divergente, informe ao main;
 nao invente rota, instale dependencia ou altere a matriz para ocultar a lacuna.

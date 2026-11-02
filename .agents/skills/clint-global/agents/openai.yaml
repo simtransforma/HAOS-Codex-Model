@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clint Global"
+  short_description: "Operar Clint CRM, tags, leads, negocios, cobrancas e n8n com seguranca"
+  default_prompt: "Use a skill Clint Global para auditar e operar contatos, tags, negocios, cobrancas e automacoes n8n da Clint sem expor segredos."

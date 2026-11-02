@@ -1,4 +1,4 @@
-"""Validate the public model offline, using only Python 3.11+ stdlib.
+"""Validate the public model offline, using Python 3.11+ and safe PyYAML.
 
 The scan includes untracked and ignored files except named metadata/dependency
 caches. This is a conservative publication gate, not a complete secret detector.
@@ -9,8 +9,10 @@ in inline code, outside fenced examples; remote URLs and anchors are not fetched
 from __future__ import annotations
 
 import argparse
+import ast
 from dataclasses import dataclass
 import hmac
+import hashlib
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -28,10 +30,14 @@ try:
     from .model_safety import sensitive_rules
     from .model_matrix import validate_matrix
     from .model_links import local_targets, prose
+    from .model_frontmatter import frontmatter
+    from .model_exports import portable_sha256, validate_exports
 except ImportError:
     from model_safety import sensitive_rules
     from model_matrix import validate_matrix
     from model_links import local_targets, prose
+    from model_frontmatter import frontmatter
+    from model_exports import portable_sha256, validate_exports
 
 
 EXCLUDED_DIRS = frozenset({
@@ -56,7 +62,7 @@ def is_link(path: Path) -> bool:
     )  # Windows junctions and other reparse points must not be followed either.
 
 
-def frontmatter(text: str) -> dict[str, str]:
+def legacy_frontmatter(text: str) -> dict[str, str]:
     """Read only name/description scalars, not a general YAML implementation."""
     lines = text.lstrip("\ufeff").splitlines()
     if not lines or lines[0].strip() != "---":
@@ -107,6 +113,7 @@ class Validator:
         self.root = Path(os.path.abspath(root))
         self.findings: set[Finding] = set()
         self.files: dict[str, str] = {}
+        self.hashes: dict[str, str] = {}
         self.agents: set[str] = set()
         self.skills: set[str] = set()
 
@@ -156,6 +163,7 @@ class Validator:
                     continue
                 for rule in sensitive_rules(name):
                     self.report(name, rule)
+                self.hashes[name] = portable_sha256(data)
                 # Do not use an extension allowlist or skip binary payloads.
                 views = [data.decode("utf-8", errors="replace")]
                 if data.startswith((b"\xff\xfe", b"\xfe\xff")):
@@ -304,12 +312,31 @@ class Validator:
         for rule in rules:
             self.report(name, rule)
 
+    def syntax(self) -> None:
+        for name, text in self.files.items():
+            try:
+                if name.endswith(".py"):
+                    ast.parse(text, filename="<checked-source>")
+                elif name.endswith(".json"):
+                    def unique(pairs):
+                        result = {}
+                        for key, value in pairs:
+                            if key in result:
+                                raise ValueError("duplicate-key")
+                            result[key] = value
+                        return result
+                    json.loads(text, object_pairs_hook=unique, parse_constant=lambda _: (_ for _ in ()).throw(ValueError("nonfinite")))
+            except (SyntaxError, ValueError, RecursionError):
+                self.report(name, "python-syntax" if name.endswith(".py") else "json-syntax")
+
     def run(self) -> list[Finding]:
         self.collect()
         if self.files:
             self.structures()
             self.matrix()
             self.links()
+            self.syntax()
+            validate_exports(self.root, self.report, hashes=self.hashes, texts=self.files)
         elif not self.findings:
             self.report(".", "model-empty")
         return sorted(self.findings)

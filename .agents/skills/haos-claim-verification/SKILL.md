@@ -62,3 +62,8 @@ prova sem autorizacao aplicavel.
 - Arquivo declara um agente: confirmar declaracao; nao afirmar spawn ou hot reload.
 - Taxa sem denominador: marcar PARCIAL ou NAO VERIFICADO e pedir a base faltante.
 - Evidencias contemporaneas divergem: expor conflito e reduzir a conclusao.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

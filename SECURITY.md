@@ -46,3 +46,11 @@ no sistema de origem com a autorizacao adequada. Remover um arquivo ou editar
 historico nao revoga um segredo. Limpeza destrutiva e reescrita de historico
 exigem coordenacao; backups e clones podem continuar contendo copias. So abra
 relato publico sanitizado apos mitigar a exposicao.
+# Imports e templates
+
+Os gates de privacidade, links, identidade e sintaxe continuam ativos para
+todo arquivo importado. Helper Python/JSON invalido nao vira implementacao
+por receber um contrato. Dependencias externas ficam bloqueadas ate existencia,
+interface e autorizacao verificadas. Nenhum import e executado pelo validador.
+As regras raiz prevalecem sobre TTL legado e instrucoes de instalar hooks,
+replicar runtimes ou acessar servidores. O pacote nao ativa esses comportamentos.

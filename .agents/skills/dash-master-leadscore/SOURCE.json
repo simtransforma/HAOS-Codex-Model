@@ -1,0 +1,51 @@
+{
+  "name": "dash-master-leadscore",
+  "version": "0.1.0",
+  "status": "LOCAL_REVIEW_REQUIRED_NOT_INSTALLED",
+  "created_at_utc": "2026-10-04T05:05:34.${RESOURCE_ID}",
+  "task_id": "auto-c4ff21d205a6-1",
+  "revision": 1,
+  "author_role": "crm-specialist",
+  "provenance": "Original private task-specific instructions derived from internal audit and user decisions; no third-party package copied",
+  "decision": "CRM próprio independente do Clint; pacote local autorizado para revisão antes de instalação",
+  "product_baseline": {
+    "path": "${HAOS_PRIVATE_ROOT}",
+    "head": "d9faab9580fb67c0229ed6d2723b2acb9f4068e4",
+    "verified_by": "01-dados.md owner audit, not deployment verification"
+  },
+  "sources": [
+    {
+      "path": "",
+      "sha256": "${RESOURCE_ID}",
+      "kind": "internal_task_artifact",
+      "audited_date": "2026-10-04"
+    },
+    {
+      "path": "",
+      "sha256": "${RESOURCE_ID}",
+      "kind": "internal_task_artifact",
+      "audited_date": "2026-10-04"
+    },
+    {
+      "path": "",
+      "sha256": "${RESOURCE_ID}",
+      "kind": "internal_task_artifact",
+      "audited_date": "2026-10-04"
+    }
+  ],
+  "package_files": [
+    {
+      "path": "SKILL.md",
+      "sha256": "${RESOURCE_ID}"
+    },
+    {
+      "path": "references/contrato-e-validacao.md",
+      "sha256": "${RESOURCE_ID}"
+    }
+  ],
+  "external_dependencies": [],
+  "scripts": [],
+  "installation_performed": false,
+  "production_changes_performed": false,
+  "source_path_policy": "Absolute source paths are provenance, not runtime requirements. Packaged reference is self-contained; revalidate current code before use."
+}

@@ -90,3 +90,8 @@ nao afirmar persistencia. Esta skill nao concede permissao de escrita externa.
   SKIP ou UPDATE apos leitura, sem duplicar.
 - Um destino confirma e outro falha: preservar o primeiro e relatar pendencia
   apenas no segundo; nao apagar prova nem simular sucesso global.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

@@ -1,0 +1,192 @@
+# -*- coding: utf-8 -*-
+"""Diagnostico de desconto em pedido do Bling: NORMAL x ORFAO (regra B5 completa).
+
+SO LEITURA. Nao altera pedido, nao emite nota, nao cria nada.
+
+Responde, por pedido:
+  EMITIR_DIRETO      desconto com lastro (ou sem desconto). Segue o fluxo normal.
+  RETRABALHO_ORFAO   desconto > soma dos itens fisicos. Precisa recriar o pedido
+                     embutindo o desconto no frete ANTES de emitir (secao 5 da
+                     skill bling-nf-desconto).
+  OUTRO_DEFEITO:x    o desconto esta ok mas o pedido tem outro problema que
+                     impede emissao (aritmetica, unidade, desconto no item,
+                     itens != totalProdutos, pago != total).
+
+Uso:
+    export HAOS_MASTER_ENV=${HAOS_PRIVATE_ROOT}
+    python3 diagnosticar_desconto.py --pids ${RESOURCE_ID},${RESOURCE_ID}
+    python3 diagnosticar_desconto.py --arquivo /tmp/pids.txt --json /tmp/diag.json
+    python3 diagnosticar_desconto.py --pids ... --workers 4 --rps 2.0
+
+"""
+import argparse
+import json
+import os
+import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+TOL = 0.01  # um centavo
+
+
+def _client():
+    os.environ.setdefault("HAOS_MASTER_ENV", "${HAOS_PRIVATE_ROOT}")
+    for p in ("${HAOS_PRIVATE_ROOT}", "${HAOS_PRIVATE_ROOT}"):
+        if p not in sys.path:
+            sys.path.insert(0, p)
+    from bling_client import BlingClient  # noqa: E402
+    return BlingClient()
+
+
+class Torneira(object):
+    """Token bucket simples: respeita o limite da CONTA (3 req/s no Bling)."""
+
+    def __init__(self, rps):
+        self.intervalo = 1.0 / max(0.1, rps)
+        self.lock = threading.Lock()
+        self.prox = 0.0
+
+    def espera(self):
+        with self.lock:
+            agora = time.time()
+            alvo = max(agora, self.prox)
+            self.prox = alvo + self.intervalo
+        d = alvo - time.time()
+        if d > 0:
+            time.sleep(d)
+
+
+def diagnosticar(d):
+    """Aplica a regra B5 COMPLETA sobre o payload do pedido. Retorna dict."""
+    itens = d.get("itens") or []
+    desc = round(float((d.get("desconto") or {}).get("valor") or 0), 2)
+    und = ((d.get("desconto") or {}).get("unidade") or "REAL").upper()
+    soma_itens = round(sum(float(i.get("valor") or 0) * float(i.get("quantidade") or 0)
+                           for i in itens), 2)
+    total_prod = round(float(d.get("totalProdutos") or 0), 2)
+    frete = round(float((d.get("transporte") or {}).get("frete") or 0), 2)
+    outras = round(float(d.get("outrasDespesas") or 0), 2)
+    total = round(float(d.get("total") or 0), 2)
+    parcelas = d.get("parcelas") or []
+    pago = round(sum(float(p.get("valor") or 0) for p in parcelas), 2)
+    zeros = [i.get("codigo") for i in itens if abs(float(i.get("valor") or 0)) < 0.005]
+
+    base = {
+        "pedido": d.get("numero"),
+        "situacao": (d.get("situacao") or {}).get("id"),
+        "tem_nota": bool((d.get("notaFiscal") or {}).get("id")),
+        "n_itens": len(itens),
+        "itens_valor_zero": zeros,
+        "desconto": desc, "unidade_desconto": und, "soma_itens": soma_itens,
+        "total_produtos": total_prod, "frete": frete, "outras_despesas": outras,
+        "total": total, "pago": pago,
+        "aritmetica": "%s + %s + %s - %s = %s (total=%s)" % (
+            soma_itens, frete, outras, desc,
+            round(soma_itens + frete + outras - desc, 2), total),
+    }
+
+    # --------- a regra B5 (as DUAS condicoes) ---------
+    if desc < -TOL:
+        return dict(base, veredito="OUTRO_DEFEITO:desconto_negativo",
+                    receita="Payload fora do previsto. Nao emitir; investigar a origem.")
+    if desc > TOL and desc > soma_itens + 0.004:
+        return dict(base, veredito="RETRABALHO_ORFAO",
+                    receita=("Desconto SEM lastro (%.2f > itens %.2f). Recriar o pedido "
+                             "com desconto ZERO e frete ajustado para itens + frete = %.2f "
+                             "(valor pago), emitir a NF do pedido novo, validar o XML e so "
+                             "entao encerrar o velho. NUNCA editar nota existente."
+                             % (desc, soma_itens, pago)))
+
+    # --------- defeitos que nao sao desconto orfao mas impedem emissao ---------
+    if desc > TOL and und != "REAL":
+        return dict(base, veredito="OUTRO_DEFEITO:desconto_unidade_%s" % und,
+                    receita="Desconto percentual nao previsto no fluxo. Converter para REAL no pedido.")
+    if any(abs(float(i.get("desconto") or 0)) > 0.004 for i in itens):
+        return dict(base, veredito="OUTRO_DEFEITO:desconto_dentro_do_item",
+                    receita="Desconto lancado no item, nao no cabecalho. Conferir a importacao da loja.")
+    if abs(soma_itens - total_prod) > TOL:
+        return dict(base, veredito="OUTRO_DEFEITO:itens_nao_batem_totalprodutos",
+                    receita="Payload incoerente (soma dos itens != totalProdutos). Nao emitir.")
+    if abs((soma_itens + frete + outras - desc) - total) > TOL:
+        return dict(base, veredito="OUTRO_DEFEITO:aritmetica_nao_fecha",
+                    receita="O pedido nao fecha. Corrigir frete/desconto antes de emitir.")
+    if not parcelas:
+        return dict(base, veredito="OUTRO_DEFEITO:sem_parcelas",
+                    receita="Sem parcela nao da para provar o que o cliente pagou.")
+    if abs(pago - total) > TOL:
+        return dict(base, veredito="OUTRO_DEFEITO:pago_diferente_total",
+                    receita="Valor pago != total do pedido. Conciliar antes de emitir.")
+    if base["tem_nota"]:
+        return dict(base, veredito="OUTRO_DEFEITO:ja_tem_nota",
+                    receita="Pedido ja tem nota. Nao emitir de novo.")
+
+    return dict(base, veredito="EMITIR_DIRETO",
+                receita=("Desconto com lastro (%.2f <= itens %.2f). Emitir pelo fluxo normal "
+                         "e conferir na nota: vDesc == %.2f, vNF == %.2f == pago, sem item "
+                         "negativo." % (desc, soma_itens, desc, total)))
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--pids", default="", help="ids de pedido separados por virgula")
+    ap.add_argument("--arquivo", default="", help="arquivo com um id por linha")
+    ap.add_argument("--json", default="", help="grava o resultado completo neste arquivo")
+    ap.add_argument("--rps", type=float, default=2.0, help="req/s (teto da conta: 3)")
+    ap.add_argument("--workers", type=int, default=4)
+    args = ap.parse_args()
+
+    pids = [p.strip() for p in args.pids.split(",") if p.strip()]
+    if args.arquivo:
+        pids += [ln.strip() for ln in open(args.arquivo, encoding="utf-8").read().splitlines()
+                 if ln.strip() and not ln.strip().startswith("#")]
+    pids = [int(p) for p in dict.fromkeys(pids)]
+    if not pids:
+        ap.error("informe --pids ou --arquivo")
+
+    cli = _client()
+    torneira = Torneira(args.rps)
+
+    def um(pid):
+        for tent in (1, 2, 3):
+            try:
+                torneira.espera()
+                return pid, diagnosticar(cli.get("/pedidos/vendas/%s" % pid)["data"]), None
+            except Exception as e:  # noqa: BLE001
+                if tent == 3:
+                    return pid, None, str(e)[:200]
+                time.sleep(2 * tent)
+
+    print("diagnosticando %d pedido(s) a %.1f req/s..." % (len(pids), args.rps))
+    saida = []
+    with ThreadPoolExecutor(max_workers=max(1, args.workers)) as ex:
+        for pid, diag, err in ex.map(um, pids):
+            if err:
+                saida.append({"pid": pid, "veredito": "ERRO_GET", "erro": err})
+                print("  pid %s ERRO_GET: %s" % (pid, err))
+                continue
+            saida.append(dict(diag, pid=pid))
+            print("  pid %s ped %s -> %s | desconto=%s itens=%s total=%s pago=%s%s"
+                  % (pid, diag["pedido"], diag["veredito"], diag["desconto"],
+                     diag["soma_itens"], diag["total"], diag["pago"],
+                     " | item(ns) R$0: %s" % diag["itens_valor_zero"]
+                     if diag["itens_valor_zero"] else ""))
+
+    resumo = {}
+    for r in saida:
+        chave = r["veredito"].split(":")[0]
+        resumo[chave] = resumo.get(chave, 0) + 1
+    print("")
+    print("RESUMO: %s" % json.dumps(resumo, ensure_ascii=False))
+    orfaos = [r["pid"] for r in saida if r["veredito"] == "RETRABALHO_ORFAO"]
+    if orfaos:
+        print("ORFAOS DE VERDADE (precisam de retrabalho): %s" % orfaos)
+    if args.json:
+        json.dump(saida, open(args.json, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+        print("detalhe gravado em %s" % args.json)
+
+
+if __name__ == "__main__":
+    main()
+

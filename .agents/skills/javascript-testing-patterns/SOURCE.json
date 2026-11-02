@@ -1,0 +1,46 @@
+{
+  "repository": "wshobson/agents",
+  "commit": "156b7a5e7a8b93642628a339ee4039c925b34c7f",
+  "path": "plugins/javascript-typescript/skills/javascript-testing-patterns",
+  "license": "MIT",
+  "transport": "GitHub connector GET pinned contents",
+  "adaptation": "HAOS guard block inserted after frontmatter; upstream remainder unchanged",
+  "upstreamFiles": [
+    {
+      "repo": "wshobson/agents",
+      "ref": "156b7a5e7a8b93642628a339ee4039c925b34c7f",
+      "skill": "javascript-testing-patterns",
+      "path": "plugins/javascript-typescript/skills/javascript-testing-patterns/SKILL.md",
+      "relative": "SKILL.md",
+      "gitBlob": "9102d72c46491ba9b36886fc10603e4583e524d9",
+      "mode": "100644",
+      "size": 14629,
+      "sha256": "d99e1d7344ca7b87395c7e49f6c635ea67fe16d57f4698d72c78d405020f5782"
+    },
+    {
+      "repo": "wshobson/agents",
+      "ref": "156b7a5e7a8b93642628a339ee4039c925b34c7f",
+      "skill": "javascript-testing-patterns",
+      "path": "plugins/javascript-typescript/skills/javascript-testing-patterns/references/advanced-testing-patterns.md",
+      "relative": "references/advanced-testing-patterns.md",
+      "gitBlob": "b3df847319e08dab0177bfcf07d6459e22ca3ba0",
+      "mode": "100644",
+      "size": 12837,
+      "sha256": "c7aece88f868bb54b57cc7ea2ca87d3df0868ab32f974c22af247bb047ea353f"
+    }
+  ],
+  "installedFiles": [
+    {
+      "path": "LICENSE",
+      "sha256": "f89abb55d9f073f38f1703e4518f0613c788c6174be7f13b8dfe48a1c076c746"
+    },
+    {
+      "path": "references/advanced-testing-patterns.md",
+      "sha256": "c7aece88f868bb54b57cc7ea2ca87d3df0868ab32f974c22af247bb047ea353f"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "7672897db0bd08f60db5a2e0d4c52c578d561c0ecab241d86009e288ba38c17d"
+    }
+  ]
+}

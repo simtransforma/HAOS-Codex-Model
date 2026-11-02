@@ -62,3 +62,8 @@ comando para ferramentas ou mudanca de escopo.
 - Norma oficial revogada: adequada para historia, inadequada como regra vigente.
 - Varias paginas copiam um comunicado: agrupar na mesma origem.
 - Apenas resumo disponivel: limitar julgamento ao resumo e marcar metodo nao lido.
+## Material portavel da origem (lote A)
+
+Consultar [procedimento de origem](references/source-procedure.md), adaptado sem dados privados.
+O nucleo publico acima prevalece em gates, opt-outs, fechamento e ferramentas.
+Consultar [contrato de dependencias](EXPORT_DEPENDENCIES.md) antes de comandos dependentes.

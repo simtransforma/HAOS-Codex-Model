@@ -1,0 +1,51 @@
+{
+  "repo": "n8n-io/skills",
+  "commit": "180b8415e3b73f78828cfa01e908e67f89f2a139",
+  "license": "Apache-2.0",
+  "path": "skills/n8n-debugging-official",
+  "localAdaptation": "HAOS 2026-10-04; see ADAPTACAO-HAOS.md; upstream bodies include identified local corrections",
+  "upstreamFiles": [
+    {
+      "path": "LICENSE",
+      "gitBlob": "c87e50b21d7195576cfda86509960d9f80a1d3bd",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "skills/n8n-debugging-official/SKILL.md",
+      "gitBlob": "acc1575ccfc5a4cda3369aed78b8c4cea7022510",
+      "sha256": "8314c6304073df2b19fee159499914e5a5eecbab922ef3c41621dc88736a767d"
+    },
+    {
+      "path": "skills/n8n-debugging-official/references/FETCHING_N8N_SOURCE.md",
+      "gitBlob": "73975288fb54b5fc04aec289cfe1e8250d97094e",
+      "sha256": "907224d8448093ecc17dce1d482fa292c5c728cf5862957d35972b310171d943"
+    },
+    {
+      "path": "skills/n8n-debugging-official/references/PARAMETER_VERIFICATION.md",
+      "gitBlob": "f76fb06aa541ada62634980f5605f7c3c0e6bd67",
+      "sha256": "1a6167e0d8e9dd2eacbcf5ed103902276cdec96d9adae3473d960a14a652f403"
+    }
+  ],
+  "installedFiles": [
+    {
+      "path": "ADAPTACAO-HAOS.md",
+      "sha256": "fa224947236ecbd30cf2c39618ada3bc14690df78bb5607ee9caf4b9aa9b16f1"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "references/FETCHING_N8N_SOURCE.md",
+      "sha256": "5b1938d272f283bb7e0b7da0dba060c6509e783d17ebb8b9db662678a96585c6"
+    },
+    {
+      "path": "references/PARAMETER_VERIFICATION.md",
+      "sha256": "16629357ebba75cf5243c2ee603e21cdc0af3725a20a7e7d425060db0c6c1794"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "a5004e66ea4d2aa66fa3cf59b9308c62151fd856e86faef2b8be9889be087a64"
+    }
+  ]
+}

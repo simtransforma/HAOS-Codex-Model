@@ -1,0 +1,4 @@
+interface:
+  display_name: "Executar Playbooks de Segurança"
+  short_description: "Playbooks autorizados com gates, evidências e remediação"
+  default_prompt: "Selecione e execute um playbook de segurança autorizado, interrompendo em qualquer risco operacional."

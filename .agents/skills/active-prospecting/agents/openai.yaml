@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prospecção Ativa"
+  short_description: "Pesquisa, qualifica e adiciona novos leads."
+  default_prompt: "Use $active-prospecting para encontrar e qualificar novas contas para esta base."

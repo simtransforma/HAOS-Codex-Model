@@ -1,0 +1,4 @@
+interface:
+  display_name: "Avaliar Segurança de Ticketing"
+  short_description: "Avaliação autorizada de aplicações e APIs de ticketing"
+  default_prompt: "Avalie com autorização uma plataforma de ticketing, respeitando escopo, segurança operacional e evidências."

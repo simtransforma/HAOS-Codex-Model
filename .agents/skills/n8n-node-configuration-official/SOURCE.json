@@ -1,0 +1,105 @@
+{
+  "repo": "n8n-io/skills",
+  "commit": "180b8415e3b73f78828cfa01e908e67f89f2a139",
+  "license": "Apache-2.0",
+  "path": "skills/n8n-node-configuration-official",
+  "localAdaptation": "HAOS 2026-10-04; see ADAPTACAO-HAOS.md; upstream bodies include identified local corrections",
+  "upstreamFiles": [
+    {
+      "path": "LICENSE",
+      "gitBlob": "c87e50b21d7195576cfda86509960d9f80a1d3bd",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "skills/n8n-node-configuration-official/SKILL.md",
+      "gitBlob": "c1cec04b5233ddd6b63aacfeb118f2607f94d11a",
+      "sha256": "afd6a7d298452608f8854ed5cfeebf305bc5994b850454aca285b3e84a6bf9fa"
+    },
+    {
+      "path": "skills/n8n-node-configuration-official/references/AI_NODES.md",
+      "gitBlob": "bb550741fa9c6a6f1b3d6515fcd50c30e0943624",
+      "sha256": "51a26b1f750c2123faf2d575ae39a5c1526cb1526f4ed2fc01bad16ef2a06707"
+    },
+    {
+      "path": "skills/n8n-node-configuration-official/references/COMMS_NODES.md",
+      "gitBlob": "c3dc77e867e23ab7ff6319e2670f65d36d38dd3c",
+      "sha256": "64b6935ff7be700edd2a7610c43c11af1f38b36a00ac178c8d71509b6fa41ad8"
+    },
+    {
+      "path": "skills/n8n-node-configuration-official/references/DATABASE_NODES.md",
+      "gitBlob": "4675eb0d3396e0e7c21b9bf75c3fa5f231f21ba9",
+      "sha256": "456261b7e05201db4f36e3b9c391782b532067913e93a4053a95c42ec5fdee4d"
+    },
+    {
+      "path": "skills/n8n-node-configuration-official/references/HTTP_NODES.md",
+      "gitBlob": "ffa2e555762d296c3cf43f6a1f3e23abea97dd9f",
+      "sha256": "2a11395bd7fe22903d8b12569d06af2ba67c8d949eb56d384e58374582363435"
+    },
+    {
+      "path": "skills/n8n-node-configuration-official/references/MERGE_NODE.md",
+      "gitBlob": "4794055b21cefbae4e038dc156432af922b53697",
+      "sha256": "1bbfca14c1a792b4a94c639b1cdb75755b050961da9121fea411f846c6604d51"
+    },
+    {
+      "path": "skills/n8n-node-configuration-official/references/SWITCH_FALLBACK.md",
+      "gitBlob": "17cc79ac27666d3b69c88dd5687bd233aa271408",
+      "sha256": "0c1b1f92bfc1bff7e7595d5ab765f6b22df2ca264bee83884b36d2e539091709"
+    },
+    {
+      "path": "skills/n8n-node-configuration-official/references/TRIGGER_NODES.md",
+      "gitBlob": "5686e4415555a7f3c69406dfeb2390613564aebf",
+      "sha256": "0118bcb7d047f27e629d59791262271862c5f49a37c1cd5b6db5f597a4b33d8b"
+    },
+    {
+      "path": "skills/n8n-node-configuration-official/references/WEBHOOK_NODES.md",
+      "gitBlob": "4a4a9940c2de2647b4e3b88f0462374c6a362890",
+      "sha256": "7c4961c6987ffce2aebf071751700722eabbe74c815bbaa63de85a8be2bfa8e7"
+    }
+  ],
+  "installedFiles": [
+    {
+      "path": "ADAPTACAO-HAOS.md",
+      "sha256": "fa224947236ecbd30cf2c39618ada3bc14690df78bb5607ee9caf4b9aa9b16f1"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "1905795d577e7fb0b394690ae7531ce36f599d905d486ef464fee67b45ae8198"
+    },
+    {
+      "path": "references/AI_NODES.md",
+      "sha256": "cd3bd6863e01c6470c147fbf3ef15c1f32207211bd45c405b7cd0ddac797d993"
+    },
+    {
+      "path": "references/COMMS_NODES.md",
+      "sha256": "d0468e5bc9d46f8643418f543f4fe384aa2d1ecb05df84a75f0b16fb274b94d2"
+    },
+    {
+      "path": "references/DATABASE_NODES.md",
+      "sha256": "ee7a03bb298db64ab54949bd2cc8c890c1343f2316ce9eaa341fdbfaf6e94191"
+    },
+    {
+      "path": "references/HTTP_NODES.md",
+      "sha256": "37fe9c5033c6cf4b7b51b0ed1f3e775b1e3c8849a808cb72385fc6645b86aa21"
+    },
+    {
+      "path": "references/MERGE_NODE.md",
+      "sha256": "151a4db66200ee14c9f7bcf32506fafe7c070df9733545ad713807901b168d9f"
+    },
+    {
+      "path": "references/SWITCH_FALLBACK.md",
+      "sha256": "35178abac97d5f141c0e3249e600c4c17a9149cbae99b85a183900892f6c5a82"
+    },
+    {
+      "path": "references/TRIGGER_NODES.md",
+      "sha256": "373289fe63da7fa6d51cec58f3ee2a78bc2f785ab15e376366cef2f02d618c88"
+    },
+    {
+      "path": "references/WEBHOOK_NODES.md",
+      "sha256": "f51c41e212a63932e33bf49a9dfe468732b522ddbb6f360e5dfa540d13b87f33"
+    },
+    {
+      "path": "SKILL.md",
+      "sha256": "2ea2bf70f35d89fe93c34f8d31292f2136df353f25cfd4b42748d5d5bf0eacf0"
+    }
+  ]
+}

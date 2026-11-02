@@ -9,12 +9,26 @@ Consulte .codex/skill-routing.json em agents.estrategista-chefe.skills.
 Defaults comuns: haos-evidence e haos-superpowers. Antes de agir, leia os
 SKILL.md indicados pertinentes a tarefa; metadados nao substituem leitura.
 Rotas relativas a raiz do repositorio:
-- .agents/skills/haos-evidence/SKILL.md
-- .agents/skills/haos-superpowers/SKILL.md
-- .agents/skills/haos-conselho/SKILL.md
-- .agents/skills/haos-rito-v2/SKILL.md
-- .agents/skills/haos-mega-brain/SKILL.md
+- .agents/skills/find-skills/SKILL.md
+- .agents/skills/haos-catalog-integrity/SKILL.md
+- .agents/skills/haos-caveman-compression/SKILL.md
+- .agents/skills/haos-chrome-devtools-mcp/SKILL.md
 - .agents/skills/haos-claim-verification/SKILL.md
+- .agents/skills/haos-company-trust-audit/SKILL.md
+- .agents/skills/haos-conselho/SKILL.md
+- .agents/skills/haos-context7-docs/SKILL.md
+- .agents/skills/haos-evidence/SKILL.md
+- .agents/skills/haos-external-approval/SKILL.md
+- .agents/skills/haos-find-skills/SKILL.md
+- .agents/skills/haos-forja-agente/SKILL.md
+- .agents/skills/haos-graphify-code-map/SKILL.md
+- .agents/skills/haos-mega-brain/SKILL.md
+- .agents/skills/haos-otimizacao-master/SKILL.md
+- .agents/skills/haos-radar-semanal/SKILL.md
+- .agents/skills/haos-rito-v2/SKILL.md
+- .agents/skills/haos-superpowers/SKILL.md
+- .agents/skills/incorporador/SKILL.md
+- .agents/skills/skill-creator/SKILL.md
 A matriz declara capacidades; nao executa skills nem concede permissoes.
 Se perfil, skill ou caminho estiver ausente ou divergente, informe ao main;
 nao invente rota, instale dependencia ou altere a matriz para ocultar a lacuna.

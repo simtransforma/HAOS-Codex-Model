@@ -1,0 +1,945 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+injetar_vars_clint.py - Injeta variaveis de template (v1..v5) em contatos do
+Clint via API, pra disparo em massa de WhatsApp sem importar CSV na mao.
+
+de telefones (ou IDs) + as copies, e este script grava os custom fields v1..v5
+direto no contato via API e (opcional) aplica uma tag pro disparo mirar.
+
+O template aprovado do Clint puxa {{1}}..{{4}} de CONTACT.V1..V4. Os slugs reais
+dos campos no painel sao MINUSCULOS: v1, v2, v3, v4, v5 (tipo Texto). O v5 existe
+mas o template atual nao usa.
+
+DOIS MODOS DE ENTRADA (mutuamente exclusivos):
+  1) MODO ARQUIVO (ENTRADA posicional): le CSV/xlsx e resolve cada linha por ID
+     ou telefone. Comportamento historico, intacto.
+  2) MODO TAG-ORIGEM (--tag-origem NOME): busca os contatos DIRETO pela tag
+     (find_tag_by_name + list_contacts_by_tag paginado completo). Se a tag nao
+     existir ou vier 0 contatos, PARA e reporta (nao grava nada). Nao le arquivo.
+     ALLOWLIST client-side: so mantem contatos que REALMENTE carregam a tag
+     (cada contato traz sua lista `tags`), pra nunca gravar na base inteira caso
+     o filtro ?tag_ids= do servidor regrida (varios filtros da API ja sao
+     documentados como frouxos).
+
+GRAVACAO PARALELA: as chamadas update_contact_fields (POST /contacts/{id}) rodam
+num ThreadPoolExecutor (--workers, default 8), com retry+backoff+jitter em
+429/resposta parcial (ate 3 tentativas). O ClintClient JA retenta 5xx e erro de
+rede internamente, entao aqui NAO reempilhamos retry por cima disso (sem
+amplificacao 3x3). Contato que falha e registrado e o processo segue. SEMPRE
+sincrono no proprio processo (nunca background/nohup, que morria junto com o
+ciclo da ferramenta).
+
+VERIFICACAO FINAL: apos gravar, rele os contatos e conta quantos ficaram com o
+valor esperado (X de N). No modo TAG-ORIGEM rele a tag inteira de UMA vez
+(paginada) e confere em memoria, em vez de N GETs individuais (498 leads ->
+~5 requisicoes). No modo ARQUIVO sem tag, cai pro GET individual (com retry).
+Faz uma rodada extra de gravacao nos que faltarem e relê pra reportar o final.
+
+Interface:
+  python injetar_vars_clint.py [ENTRADA | --tag-origem NOME]
+         [--tag NOME] [--v1 TXT ... --v5 TXT] [--criar-tag] [--criar]
+         [--dry-run] [--workers N] [--limit N] [--fone COL] [--id-col COL]
+         [--nome-col COL] [--origin ORIGIN_ID] [--country 55]
+
+ENTRADA (modo arquivo): CSV/xlsx. Precisa de UMA forma de achar o contato por
+linha:
+  - coluna de ID do Clint (id / contact_id / clint_id ...), OU
+  - coluna de telefone (telefone / numero / phone / celular / whatsapp ...).
+  Se as duas existirem, o ID tem prioridade (match exato, mais seguro).
+  Pode ter tambem colunas v1..v5 (copies por linha) e/ou uma coluna de nome.
+
+Copies:
+  --v1..--v5 sao copies FIXAS aplicadas a TODAS as linhas/contatos (modo disparo
+  em massa) e SOBREPOEM as colunas v1..v5 da planilha quando as duas existem.
+  So grava os campos que tiverem valor (string nao vazia). String vazia e
+  ignorada pela API do Clint (nao limpa campo). No modo --tag-origem as copies
+  vem SO das flags --vN (nao ha planilha).
+
+Como acha o contato por telefone (modo arquivo):
+  normaliza o telefone -> tenta ?phone= com o numero normalizado -> se nao achar,
+  gera a variacao com/sem o 9o digito (logica da chave canonica) e tenta de novo.
+  SEMPRE confere no cliente (chave canonica do fullPhone) antes de aceitar o
+  match, entao nunca escreve num contato que so voltou por filtro frouxo.
+
+Seguranca:
+  - Nunca expoe o token (o cliente le do MASTER.env e nunca imprime).
+  - Mascara nome/telefone/email nos logs (nome = primeiro nome + inicial).
+  - Erro de API vira status+rota nos logs (sem query e sem corpo cru, que podem
+    carregar PII).
+  - --dry-run nao grava nada; mostra exatamente o que faria.
+  - Escrita = update_contact_fields (POST /contacts/{id}, unica rota que persiste
+    custom field) + add_tags_to_contact. Nao cria/edita nada fora disso.
+  - Nao dispara mensagem nenhuma.
+
+Depende de: stdlib + pandas + openpyxl + clint_client (skill clint-api) +
+limpar_lista (skill limpar-lista-contatos). Nao reimplementa auth/normalizacao.
+"""
+from __future__ import annotations
+
+import argparse
+import concurrent.futures
+import http.client
+import importlib.util
+import os
+import random
+import re
+import sys
+import time
+import urllib.error
+from pathlib import Path
+
+import pandas as pd
+
+# Saida sempre UTF-8 (nao quebrar console do Windows com emoji/acento).
+for _stream in ("stdout", "stderr"):
+    try:
+        getattr(sys, _stream).reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
+SKILLS_DIR = Path.home() / ".claude" / "skills"
+CLINT_CLIENT_PATH = SKILLS_DIR / "clint-api" / "scripts" / "clint_client.py"
+LIMPAR_LISTA_PATH = SKILLS_DIR / "limpar-lista-contatos" / "scripts" / "limpar_lista.py"
+
+VCAMPOS = ["v1", "v2", "v3", "v4", "v5"]
+
+# Gravacao paralela + retry (item motivador: 498 leads travavam no sequencial).
+DEFAULT_WORKERS = 8
+WRITE_TENTATIVAS = 3
+WRITE_BACKOFF_BASE = 0.5  # s; backoff exponencial com jitter (ver _backoff)
+
+# Verificacao: o endpoint de LISTAGEM por tag tem read-after-write lag (a
+# escrita persiste, mas a listagem so reflete alguns segundos depois; get_contact
+# individual e mais fresco). Por isso a verificacao CONVERGE: rele algumas vezes
+# com um settle curto ANTES de concluir que faltou, pra nao disparar uma rodada
+# extra de escrita (que dobraria a carga em lotes grandes) por causa de leitura
+# defasada. So reescreve o que continuar faltando depois de convergir a leitura.
+VERIF_TENTATIVAS = 4
+VERIF_SETTLE = 2.0  # s entre releituras (deixa a listagem alcancar a escrita)
+
+# Auto-deteccao de colunas (header minusculo, sem espaco nas pontas).
+# So candidatos com >= MIN_PARCIAL chars entram no match PARCIAL (substring),
+# senao 'id' (2 chars) casaria dentro de 'cidade'/'unidade'/'identidade' e
+# roubaria a coluna de ID, quebrando TODO o lookup. Match exato vale sempre.
+MIN_PARCIAL = 4
+CAND_ID = ["id", "contact_id", "clint_id", "id_clint", "contactid",
+           "id_contato", "contato_id", "id_do_contato"]
+CAND_FONE = ["telefone", "numero", "número", "phone", "celular", "whatsapp",
+             "fone", "tel", "cel", "mobile", "contactphone", "complete_phone"]
+CAND_NOME = ["nome", "name", "cliente", "contato", "nome completo", "full name",
+             "contactname"]
+
+
+# ----------------------------------------------------------------------------
+# Import dos modulos reutilizados (por caminho absoluto, sem duplicar logica)
+# ----------------------------------------------------------------------------
+
+def _load_module(nome_modulo: str, caminho: Path):
+    if not caminho.exists():
+        sys.exit(f"ERRO: dependencia nao encontrada: {caminho}")
+    spec = importlib.util.spec_from_file_location(nome_modulo, str(caminho))
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[nome_modulo] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_clint = _load_module("clint_client", CLINT_CLIENT_PATH)
+_limpar = _load_module("limpar_lista", LIMPAR_LISTA_PATH)
+
+ClintClient = _clint.ClintClient
+ClintAPIError = _clint.ClintAPIError
+mask_pii = _clint.mask_pii
+normaliza_fone = _limpar.normaliza_fone
+chave_canonica = _limpar.chave_canonica
+
+
+# ----------------------------------------------------------------------------
+# Helpers
+# ----------------------------------------------------------------------------
+
+def extract_contact(resp):
+    """GET /contacts/{id} volta {"status":..,"data":{...}}. Isola o contato."""
+    if isinstance(resp, dict) and isinstance(resp.get("data"), dict):
+        return resp["data"]
+    return resp if isinstance(resp, dict) else {}
+
+
+def achar_col(cols, candidatos):
+    """Acha a coluna cujo header bate com um candidato (exato e depois parcial).
+
+    O match PARCIAL (substring) so vale pra candidatos com >= MIN_PARCIAL chars,
+    pra 'id' nao casar dentro de 'cidade' e roubar a coluna de ID.
+    """
+    low = {str(c).lower().strip(): c for c in cols}
+    for cand in candidatos:
+        if cand in low:
+            return low[cand]
+    for cand in candidatos:
+        if len(cand) < MIN_PARCIAL:
+            continue
+        for lc, orig in low.items():
+            if cand in lc:
+                return orig
+    return None
+
+
+def achar_col_v(cols, i):
+    """Acha a coluna 'vN' (case-insensitive, match exato)."""
+    alvo = f"v{i}"
+    for c in cols:
+        if str(c).lower().strip() == alvo:
+            return c
+    return None
+
+
+def cel(valor) -> str:
+    """Normaliza celula pra string limpa ('' pra NaN/None)."""
+    if valor is None:
+        return ""
+    s = str(valor)
+    if s.strip().lower() in ("nan", "none", "nat"):
+        return ""
+    return s.strip()
+
+
+def _norm_cmp(valor) -> str:
+    """Normaliza pra COMPARACAO tolerante (colapsa espacos internos).
+
+    Evita 'AINDA faltando' falso se a API normalizar espacos do valor gravado.
+    """
+    return re.sub(r"\s+", " ", cel(valor)).strip()
+
+
+def mask_nome(nome) -> str:
+    """Mascara nome pra log (primeiro nome + inicial do ultimo)."""
+    s = cel(nome)
+    if not s:
+        return "(sem nome)"
+    parts = s.split()
+    if len(parts) == 1:
+        return parts[0]
+    return f"{parts[0]} {parts[-1][:1]}."
+
+
+def err_str(e) -> str:
+    """Erro de API pra log SEM query nem corpo cru (podem carregar PII)."""
+    if isinstance(e, ClintAPIError):
+        rota = (e.url or "").split("?", 1)[0]
+        return f"HTTP {e.status} em {rota}"
+    return type(e).__name__
+
+
+def carregar_tabela(entrada: str) -> pd.DataFrame:
+    """Le csv/xlsx mantendo TUDO como string (as copies precisam sobreviver)."""
+    ext = os.path.splitext(entrada)[1].lower()
+    if ext in (".xlsx", ".xls", ".xlsm"):
+        return pd.read_excel(entrada, dtype=str)
+    # CSV: detecta ';' vs ',' pela 1a linha; utf-8-sig aguenta BOM/acento/emoji.
+    with open(entrada, "r", encoding="utf-8-sig", errors="replace", newline="") as f:
+        primeira = f.readline()
+    sep = ";" if primeira.count(";") > primeira.count(",") else ","
+    df = pd.read_csv(entrada, dtype=str, sep=sep, engine="python",
+                     encoding="utf-8-sig", header=0, index_col=False)
+    vazias = [c for c in df.columns
+              if str(c).startswith("Unnamed")
+              and df[c].fillna("").astype(str).str.strip().eq("").all()]
+    return df.drop(columns=vazias) if vazias else df
+
+
+def variantes_fone(norm: str, country: str = "55") -> list[str]:
+    """Numero normalizado + a variacao com/sem o 9o digito do celular BR.
+
+    Ex: ${RESOURCE_ID} (com 9) tambem tenta ${RESOURCE_ID} (sem 9) e vice-versa.
+    Dedup preservando ordem. Chave canonica confirma o match depois.
+    """
+    d = re.sub(r"\D", "", norm or "")
+    out = [d] if d else []
+    if d.startswith(country):
+        nat = d[len(country):]
+        if len(nat) == 11 and nat[2] == "9":       # DDD(2)+9+8 -> tira o 9
+            out.append(country + nat[:2] + nat[3:])
+        elif len(nat) == 10:                        # DDD(2)+8 -> poe o 9
+            out.append(country + nat[:2] + "9" + nat[2:])
+    return list(dict.fromkeys([x for x in out if x]))
+
+
+def buscar_por_telefone(c, numero_norm: str, country: str = "55"):
+    """Acha contato por telefone com verificacao client-side pela chave canonica.
+
+    Retorna (contato_dict, tentado) ou (None, None). Nunca aceita match sem a
+    chave canonica bater, mesmo que o filtro ?phone= da API venha frouxo.
+    """
+    alvo_chave = chave_canonica(numero_norm, country)
+    if not alvo_chave:
+        return None, None
+    for cand in variantes_fone(numero_norm, country):
+        try:
+            r = _retry_call(
+                lambda: c.get("/contacts", params={"phone": cand, "page": 1, "limit": 100}))
+        except ClintAPIError:
+            continue
+        except Exception:
+            continue
+        data = r.get("data") or []
+        casados = [
+            ct for ct in data
+            if chave_canonica(
+                _clint.only_digits(ct.get("fullPhone") or ct.get("phone") or ""),
+                country,
+            ) == alvo_chave
+        ]
+        if len(casados) == 1:
+            return casados[0], cand
+        if len(casados) > 1:
+            return {"__ambiguo__": len(casados)}, cand
+    return None, None
+
+
+def montar_fields(row_cols: dict, flags: dict) -> dict:
+    """fields a gravar: coluna vN da planilha, sobreposta pela flag --vN.
+
+    A decisao do override usa o valor JA normalizado (cel), entao uma flag so
+    com espacos nao suprime a coluna nem grava vazio. So entra campo com valor
+    nao vazio (string vazia a API ignora).
+    """
+    fields = {}
+    for k in VCAMPOS:
+        fval = cel(flags.get(k))
+        valor = fval or cel(row_cols.get(k, ""))
+        if valor:
+            fields[k] = valor
+    return fields
+
+
+def resumo_campos(fields: dict) -> str:
+    if not fields:
+        return "(nenhum)"
+    return ", ".join(f"{k}({len(v)})" for k, v in sorted(fields.items()))
+
+
+def novo_job(cid, nome, fields, tel_mask, match):
+    """Estrutura unica de trabalho (usada pelas duas modalidades de coleta)."""
+    return {
+        "cid": cid,
+        "nome": mask_nome(nome),
+        "fields": dict(fields),
+        "tel_mask": tel_mask or "-",
+        "match": match,
+        "id_short": f"{str(cid)[:8]}...",
+    }
+
+
+def _filtrar_por_tag(contatos, tag_id):
+    """ALLOWLIST client-side: mantem so contatos que REALMENTE carregam a tag.
+
+    Cada contato do Clint traz sua lista `tags` = [{id,name,color}, ...]. Isso
+    e a defesa contra regressao do filtro ?tag_ids= (varios filtros da API ja
+    sao frouxos): se o servidor devolvesse a base inteira, aqui cai fora quem
+    nao tem a tag. Se NENHUM contato expuser `tags` (API parou de devolver),
+    NAO filtra (fail-open) pra nao quebrar o caminho validado.
+
+    Retorna (contatos_filtrados, validou_bool).
+    """
+    algum_com_tags = any(isinstance(ct.get("tags"), list) for ct in contatos)
+    if not algum_com_tags:
+        return contatos, False
+    filtrados = [
+        ct for ct in contatos
+        if any((t or {}).get("id") == tag_id for t in (ct.get("tags") or []))
+    ]
+    return filtrados, True
+
+
+# ----------------------------------------------------------------------------
+# Retry + backoff (429 e resposta parcial). O ClintClient ja retenta 5xx e erro
+# de rede; aqui cobrimos so o que ele NAO cobre, pra nao amplificar (retry
+# aninhado = 3x3 = 9 tentativas seguraria o worker durante um incidente).
+# ----------------------------------------------------------------------------
+
+def _backoff(attempt: int) -> float:
+    """Backoff exponencial com jitter (evita thundering herd de N workers)."""
+    base = WRITE_BACKOFF_BASE * (2 ** attempt)
+    return base + random.random() * base * 0.5
+
+
+def _transitorio(exc) -> bool:
+    """Erro que vale retry NESTA camada (sem duplicar o retry do ClintClient)."""
+    # URLError/TimeoutError o cliente ja retenta -> nao repetir aqui.
+    if isinstance(exc, (urllib.error.URLError, TimeoutError)):
+        return False
+    if isinstance(exc, ClintAPIError):
+        return exc.status == 429  # 5xx o cliente ja retenta; 429 e nosso
+    # Resposta parcial/truncada (IncompleteRead e HTTPException, nao URLError)
+    # + OSError cru que escape do cliente.
+    return isinstance(exc, (http.client.HTTPException, OSError))
+
+
+def _retry_call(fn):
+    """Executa fn() com retry em erro transitorio. Retorna o valor ou levanta."""
+    ultimo = None
+    for attempt in range(WRITE_TENTATIVAS):
+        try:
+            return fn()
+        except Exception as e:  # noqa: BLE001 (classificamos por tipo)
+            ultimo = e
+            if _transitorio(e) and attempt < WRITE_TENTATIVAS - 1:
+                time.sleep(_backoff(attempt))
+                continue
+            raise
+    raise ultimo  # pragma: no cover
+
+
+def _com_retry(fn):
+    """Como _retry_call mas devolve (ok: bool, err: Exception | None)."""
+    try:
+        _retry_call(fn)
+        return True, None
+    except Exception as e:  # noqa: BLE001
+        return False, e
+
+
+def _gravar_job(c, job, tag_id):
+    """Grava fields (+ tag) de UM contato. Roda dentro do ThreadPoolExecutor.
+
+    Retorna (job, ok_fields, err). Falha na tag e NAO fatal (fields ja gravou).
+    """
+    fields = job["fields"]
+    ok_fields, err = True, None
+    if fields:
+        ok_fields, err = _com_retry(lambda: c.update_contact_fields(job["cid"], fields))
+    if ok_fields and tag_id:
+        ok_tag, err_tag = _com_retry(
+            lambda: c.add_tags_to_contact(job["cid"], [tag_id]))
+        if not ok_tag:
+            job["_tag_falhou"] = err_str(err_tag)
+    return job, ok_fields, err
+
+
+def _gravar_lote(c, jobs, tag_id, workers, totais):
+    """Grava uma lista de jobs em paralelo. Imprime OK/ERRO no thread principal.
+
+    Job sem nenhum campo E sem tag a aplicar e no-op: nao grava nada e conta
+    como pulado (nao infla 'atualizados' com falso positivo).
+    """
+    reais = []
+    for job in jobs:
+        if not job["fields"] and not tag_id:
+            totais["pulado"] += 1
+            print(f"[PULADO vazio] {job['nome']} | id={job['id_short']} "
+                  f"(sem copy e sem tag pra aplicar)")
+        else:
+            reais.append(job)
+    if not reais:
+        return
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
+        futs = [ex.submit(_gravar_job, c, job, tag_id) for job in reais]
+        for fut in concurrent.futures.as_completed(futs):
+            job, ok, err = fut.result()
+            nota_tag = ""
+            if tag_id and not job.get("_tag_falhou"):
+                nota_tag = " | tag: ok"
+            elif job.get("_tag_falhou"):
+                nota_tag = f" | tag: FALHOU ({job['_tag_falhou']})"
+            if ok:
+                totais["atualizado"] += 1
+                print(f"[OK atualizado] {job['nome']} | id={job['id_short']} "
+                      f"| match={job['match']} | tel={job['tel_mask']} "
+                      f"| campos: {resumo_campos(job['fields'])}{nota_tag}")
+            else:
+                totais["erro"] += 1
+                print(f"[ERRO gravacao] {job['nome']} | id={job['id_short']} "
+                      f": {err_str(err)}")
+
+
+# ----------------------------------------------------------------------------
+# Verificacao final (rele os contatos e conta quantos bateram)
+# ----------------------------------------------------------------------------
+
+def _job_ok(job, got: dict) -> bool:
+    return all(_norm_cmp(got.get(k)) == _norm_cmp(v) for k, v in job["fields"].items())
+
+
+def _verificar(c, jobs, workers, reread_tag_id=None):
+    """Rele os contatos e devolve os que NAO ficaram com o valor esperado.
+
+    Se `reread_tag_id` (contexto de tag), rele a tag INTEIRA de uma vez
+    (paginada, com retry) e confere em memoria -> ~ceil(N/100) requisicoes em
+    vez de N GETs. Senao, GET individual por contato (com retry). Falha de
+    LEITURA transitoria NAO e confundida com 'faltando' (o retry cobre; se ainda
+    assim falhar, o contato entra na rodada extra, que e idempotente).
+    """
+    faltando = []
+
+    if reread_tag_id:
+        idx = None
+        try:
+            contatos = _retry_call(lambda: c.list_contacts_by_tag(reread_tag_id))
+            idx = {ct.get("id"): (ct.get("fields") or {}) for ct in contatos}
+        except Exception:
+            idx = None
+        if idx is not None:
+            for job in jobs:
+                got = idx.get(job["cid"])
+                if got is None or not _job_ok(job, got):
+                    faltando.append(job)
+            return faltando
+        # bulk falhou -> cai pro individual abaixo
+
+    def check(job):
+        try:
+            ct = extract_contact(_retry_call(lambda: c.get_contact(job["cid"])))
+        except Exception:
+            return job, False
+        return job, _job_ok(job, ct.get("fields") or {})
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
+        for fut in concurrent.futures.as_completed(
+                [ex.submit(check, j) for j in jobs]):
+            job, ok = fut.result()
+            if not ok:
+                faltando.append(job)
+    return faltando
+
+
+def _verificar_convergindo(c, jobs, workers, reread_tag_id):
+    """Rele com settle curto ate convergir (absorve read-after-write lag).
+
+    Reescrita e cara; leitura defasada nao deve dispara-la. Aqui so LEMOS, com
+    algumas releituras espacadas, e devolvemos o que REALMENTE nao persistiu.
+    """
+    faltando = list(jobs)
+    for _ in range(VERIF_TENTATIVAS):
+        time.sleep(VERIF_SETTLE)
+        faltando = _verificar(c, faltando, workers, reread_tag_id)
+        if not faltando:
+            break
+    return faltando
+
+
+def gravar_e_verificar(c, jobs, args, tag_id, totais, reread_tag_id=None):
+    """Grava os jobs em paralelo e verifica o resultado relendo a tag/lista."""
+    if not jobs:
+        return
+    print(f"gravando {len(jobs)} contato(s) com {args.workers} workers...")
+    _gravar_lote(c, jobs, tag_id, args.workers, totais)
+
+    # Verificacao: so faz sentido pros que tinham campo pra gravar.
+    alvos = [j for j in jobs if j["fields"]]
+    if not alvos:
+        return
+    print("-" * 72)
+    print(f"verificando {len(alvos)} contato(s) (relendo, com settle p/ lag)...")
+    faltando = _verificar_convergindo(c, alvos, args.workers, reread_tag_id)
+    ok_n = len(alvos) - len(faltando)
+    print(f"VERIFICACAO: {ok_n} de {len(alvos)} com o valor esperado.")
+
+    if faltando:
+        print(f"  {len(faltando)} faltando de verdade -> rodada extra de gravacao...")
+        extra = {"atualizado": 0, "erro": 0, "pulado": 0}
+        _gravar_lote(c, faltando, tag_id, args.workers, extra)
+        faltando2 = _verificar_convergindo(c, faltando, args.workers, reread_tag_id)
+        ok_final = len(alvos) - len(faltando2)
+        print(f"VERIFICACAO (pos-extra): {ok_final} de {len(alvos)} com o valor "
+              f"esperado.")
+        if faltando2:
+            print("  AINDA faltando (nao gravou apos a rodada extra):")
+            for j in faltando2:
+                print(f"    - {j['nome']} | id={j['id_short']} | tel={j['tel_mask']}")
+        totais["verificados_ok"] = ok_final
+        totais["verificados_total"] = len(alvos)
+    else:
+        totais["verificados_ok"] = ok_n
+        totais["verificados_total"] = len(alvos)
+
+
+# ----------------------------------------------------------------------------
+# Resolucao da tag a APLICAR (--tag), compartilhada pelas duas modalidades
+# ----------------------------------------------------------------------------
+
+def resolver_tag_aplicar(c, args):
+    """Resolve/cria a --tag a aplicar. Retorna tag_id ou None.
+
+    So deve ser chamada DEPOIS de validar a origem (no tag-origem), pra nao
+    criar uma tag vazia se a origem estiver ausente/vazia ('nada gravado').
+    """
+    if not args.tag:
+        return None
+    tag = c.find_tag_by_name(args.tag)
+    if tag:
+        print(f"tag a aplicar: {args.tag!r} -> {tag['id']}")
+        return tag["id"]
+    if args.criar_tag:
+        if args.dry_run:
+            print(f"tag a aplicar: {args.tag!r} NAO existe -> [DRY-RUN] criaria")
+            return None
+        nova = c.post("/tags", body={"name": args.tag})
+        tag_id = extract_contact(nova).get("id") or nova.get("id")
+        print(f"tag a aplicar: {args.tag!r} criada -> {tag_id}")
+        return tag_id
+    print(f"tag a aplicar: {args.tag!r} NAO existe -> seguindo SEM tag "
+          f"(use --criar-tag pra criar)")
+    return None
+
+
+# ----------------------------------------------------------------------------
+# MODO TAG-ORIGEM: coleta os contatos direto pela tag
+# ----------------------------------------------------------------------------
+
+def coletar_por_tag(c, args, flags, totais):
+    """Busca contatos pela --tag-origem. PARA (sys.exit) se tag sumida ou vazia.
+
+    Retorna (jobs, tag_id, origem_id). jobs vem vazia no --dry-run (que so
+    imprime). origem_id volta pra reler a tag inteira na verificacao.
+    """
+    print(f"tag-origem: {args.tag_origem!r} (buscando contatos...)")
+    tag = c.find_tag_by_name(args.tag_origem)
+    if not tag:
+        sys.exit(f"ERRO: tag de origem {args.tag_origem!r} NAO existe no Clint. "
+                 f"Nada gravado.")
+    origem_id = tag["id"]
+    try:
+        contatos_raw = _retry_call(lambda: c.list_contacts_by_tag(origem_id))
+    except Exception as e:  # noqa: BLE001
+        sys.exit(f"ERRO: falha lendo contatos da tag {args.tag_origem!r}: "
+                 f"{err_str(e)}. Nada gravado.")
+    if not contatos_raw:
+        sys.exit(f"ERRO: tag {args.tag_origem!r} ({origem_id}) tem 0 contatos. "
+                 f"Nada gravado.")
+
+    # ALLOWLIST client-side: nunca gravar em quem nao carrega a tag de origem.
+    contatos, validou = _filtrar_por_tag(contatos_raw, origem_id)
+    if validou and len(contatos) != len(contatos_raw):
+        print(f"allowlist: API devolveu {len(contatos_raw)} -> "
+              f"{len(contatos)} REALMENTE com a tag "
+              f"(descartados {len(contatos_raw) - len(contatos)} sem a tag)")
+    if not contatos:
+        sys.exit(f"ERRO: apos allowlist client-side, 0 contatos realmente "
+                 f"carregam a tag {args.tag_origem!r}. Nada gravado.")
+
+    fields_fixos = montar_fields({}, flags)
+
+    # Resolve a tag a APLICAR so AGORA (origem ja validada) pra nao criar tag
+    # vazia se a origem tivesse falhado.
+    tag_id = resolver_tag_aplicar(c, args)
+
+    if not fields_fixos and not tag_id:
+        sys.exit("ERRO: --tag-origem sem nenhuma copy (--v1..--v5) e sem --tag "
+                 "pra aplicar: nao ha nada a gravar. Nada gravado.")
+
+    print(f"tag-origem: {args.tag_origem!r} -> {origem_id} | contatos: {len(contatos)}"
+          + (f" | limit: {args.limit}" if args.limit else ""))
+    if fields_fixos:
+        print(f"copies FIXAS pra todos: {resumo_campos(fields_fixos)}")
+    else:
+        print("sem copies (--vN) -> so aplicara a --tag nos contatos")
+    print("-" * 72)
+
+    jobs = []
+    n = 0
+    for ct in contatos:
+        if args.limit and n >= args.limit:
+            break
+        n += 1
+        cid = ct.get("id")
+        if not cid:
+            totais["pulado"] += 1
+            continue
+        tel = _clint.only_digits(ct.get("fullPhone") or ct.get("phone") or "")
+        job = novo_job(cid, ct.get("name"), fields_fixos,
+                       mask_pii(tel) if tel else "-", "tag-origem")
+        if args.dry_run:
+            print(f"[DRY-RUN] {job['nome']} | id={job['id_short']} "
+                  f"| match=tag-origem | tel={job['tel_mask']} "
+                  f"| gravaria: {resumo_campos(job['fields'])}"
+                  + (f" | tag: {args.tag}" if tag_id else ""))
+            totais["dry"] += 1
+            continue
+        jobs.append(job)
+    return jobs, tag_id, origem_id
+
+
+# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
+def coletar_por_arquivo(c, args, flags, totais):
+    """Le a planilha e resolve cada linha por ID/telefone (logica historica).
+
+    Faz o mesmo lookup de sempre (id -> telefone -> --criar), so que em vez de
+    gravar inline devolve os jobs pro gravador paralelo. --dry-run continua
+    imprimindo a linha 'gravaria' e nao devolve job.
+
+    Retorna (jobs, tag_id, None) - o None indica 'sem tag de reread' pra
+    verificacao (arquivo cai no GET individual).
+    """
+    if not os.path.isfile(args.entrada):
+        sys.exit(f"ERRO: arquivo nao encontrado: {args.entrada}")
+
+    if args.criar or args.origin:
+        print("AVISO: --criar/--origin criam contato/deal FORA da lista alvo "
+              "(caminho nao validado). A garantia de 'so grava em contato "
+              "existente' NAO vale com essas flags.")
+
+    df = carregar_tabela(args.entrada)
+    cols = list(df.columns)
+
+    c_id = args.id_col or achar_col(cols, CAND_ID)
+    c_fone = args.fone or achar_col(cols, CAND_FONE)
+    c_nome = args.nome_col or achar_col(cols, CAND_NOME)
+    c_v = {f"v{i}": achar_col_v(cols, i) for i in range(1, 6)}
+
+    if not c_id and not c_fone:
+        sys.exit(
+            "ERRO: a planilha precisa de uma coluna de ID do Clint OU de telefone. "
+            f"Colunas vistas: {cols}. Use --id-col ou --fone."
+        )
+
+    tag_id = resolver_tag_aplicar(c, args)
+
+    # Guard: sem nenhuma copy possivel (flag nem coluna) e sem tag = nada a
+    # gravar -> aborta, senao 'RESUMO' reportaria atualizados sem gravar nada.
+    tem_flag_copy = any(cel(flags.get(k)) for k in VCAMPOS)
+    tem_col_copy = any(c_v[k] for k in VCAMPOS)
+    if not tem_flag_copy and not tem_col_copy and not tag_id:
+        sys.exit("ERRO: modo arquivo sem nenhuma copy (--vN nem colunas v1..v5) "
+                 "e sem --tag pra aplicar: nao ha nada a gravar. Nada gravado.")
+
+    flags_ativas = {k: cel(flags.get(k)) for k in VCAMPOS if cel(flags.get(k))}
+    print(f"entrada: {args.entrada} | linhas: {len(df)}"
+          + (f" | limit: {args.limit}" if args.limit else ""))
+    print(f"coluna id: {c_id!r} | coluna telefone: {c_fone!r} | coluna nome: {c_nome!r}")
+    print("colunas v1..v5 na planilha: "
+          + ", ".join(f"{k}={c_v[k]!r}" for k in VCAMPOS))
+    if flags_ativas:
+        print("copies FIXAS (--vN, sobrepoem a planilha): "
+              + ", ".join(f"{k}({len(v)})" for k, v in flags_ativas.items()))
+    print("-" * 72)
+
+    jobs = []
+    n = 0
+    for _, row in df.iterrows():
+        if args.limit and n >= args.limit:
+            break
+        n += 1
+
+        rid = cel(row[c_id]) if c_id else ""
+        rfone = cel(row[c_fone]) if c_fone else ""
+        rnome = cel(row[c_nome]) if c_nome else ""
+        row_v = {k: (cel(row[c_v[k]]) if c_v[k] else "") for k in VCAMPOS}
+        fields = montar_fields(row_v, flags)
+
+        tel_mask = mask_pii(rfone) if rfone else "-"
+        rotulo = mask_nome(rnome)
+
+        # 1) Resolver o contato: ID tem prioridade; senao telefone.
+        contato = None
+        cid = None
+        modo_match = None
+        try:
+            if rid:
+                resp = _retry_call(lambda: c.get_contact(rid))
+                contato = extract_contact(resp)
+                if not contato or not contato.get("id"):
+                    print(f"[PULADO nao_encontrado] {rotulo} | id={rid[:8]}... (id nao existe)")
+                    totais["pulado"] += 1
+                    continue
+                cid = contato["id"]
+                modo_match = "id"
+            elif rfone:
+                norm = normaliza_fone(rfone, args.country)
+                if not norm:
+                    print(f"[PULADO sem_telefone] {rotulo} | tel={tel_mask}")
+                    totais["pulado"] += 1
+                    continue
+                contato, tentado = buscar_por_telefone(c, norm, args.country)
+                if contato and contato.get("__ambiguo__"):
+                    print(f"[PULADO ambiguo] {rotulo} | tel={tel_mask} "
+                          f"({contato['__ambiguo__']} contatos casaram, nao vou adivinhar)")
+                    totais["pulado"] += 1
+                    continue
+                if contato:
+                    cid = contato["id"]
+                    modo_match = f"telefone({tentado[:4]}...)"
+            else:
+                print(f"[PULADO sem_chave] {rotulo} (linha sem id e sem telefone)")
+                totais["pulado"] += 1
+                continue
+        except ClintAPIError as e:
+            print(f"[ERRO lookup] {rotulo} | tel={tel_mask} : {err_str(e)}")
+            totais["erro"] += 1
+            continue
+        except Exception as e:  # noqa: BLE001
+            print(f"[ERRO lookup] {rotulo} | tel={tel_mask} : {err_str(e)}")
+            totais["erro"] += 1
+            continue
+
+        # 2) Nao achou por telefone
+        if not cid:
+            if args.criar:
+                res = _criar_contato(c, rnome, rfone, args, fields, tag_id)
+                print(res[0])
+                totais[res[1]] += 1
+            else:
+                print(f"[PULADO nao_encontrado] {rotulo} | tel={tel_mask} "
+                      f"(use --criar pra criar)")
+                totais["pulado"] += 1
+            continue
+
+        nome_clint = contato.get("name") or rnome
+
+        # 3) DRY-RUN: so mostra, nao vira job
+        if args.dry_run:
+            print(f"[DRY-RUN] {mask_nome(nome_clint)} | id={cid[:8]}... "
+                  f"| match={modo_match} | tel={tel_mask} "
+                  f"| gravaria: {resumo_campos(fields)}"
+                  + (f" | tag: {args.tag}" if tag_id else ""))
+            totais["dry"] += 1
+            continue
+
+        # 4) Vira job pro gravador paralelo
+        jobs.append(novo_job(cid, nome_clint, fields, tel_mask, modo_match))
+
+    return jobs, tag_id, None
+
+
+def _criar_contato(c, nome, fone, args, fields, tag_id):
+    """Cria contato quando --criar e o telefone nao existe no Clint.
+
+    ATENCAO: caminho conservador e NAO validado em producao (o teste da skill
+    nao pode criar contato). Escreve FORA da lista/tag alvo (e, com --origin,
+    cria um deal) - rompe a garantia de 'so grava em contato existente'. Prefira
+    sempre gravar em contato existente.
+    """
+    norm = normaliza_fone(fone, args.country)
+    try:
+        if args.origin:
+            deal = c.create_deal(origin_id=args.origin, name=nome or None,
+                                 phone=norm or None, ddi=args.country,
+                                 fields=fields or None)
+            cid = (deal.get("data") or {}).get("contact_id")
+        else:
+            payload = {"fullPhone": norm}
+            if nome:
+                payload["name"] = nome
+            if fields:
+                payload["fields"] = fields
+            if tag_id:
+                payload["tag_ids"] = [tag_id]
+            novo = c.create_contact(payload)
+            cid = extract_contact(novo).get("id") or novo.get("id")
+        if cid and tag_id and args.origin:
+            c.add_tags_to_contact(cid, [tag_id])
+        return (f"[OK criado] {mask_nome(nome)} | id={str(cid)[:8]}... "
+                f"| campos: {resumo_campos(fields)}", "criado")
+    except ClintAPIError as e:
+        return (f"[ERRO criar] {mask_nome(nome)} tel={mask_pii(fone)} : {err_str(e)}",
+                "erro")
+
+
+# ----------------------------------------------------------------------------
+# Core
+# ----------------------------------------------------------------------------
+
+def processar(args):
+    # Validacao dos modos: exatamente UM entre ENTRADA e --tag-origem.
+    if bool(args.entrada) == bool(args.tag_origem):
+        if args.entrada and args.tag_origem:
+            sys.exit("ERRO: escolha UM modo: ENTRADA (arquivo) OU --tag-origem, "
+                     "nao os dois.")
+        sys.exit("ERRO: informe um arquivo de ENTRADA ou use --tag-origem NOME.")
+
+    if args.workers < 1:
+        args.workers = 1
+
+    flags = {f"v{i}": getattr(args, f"v{i}") for i in range(1, 6)}
+
+    modo = "TAG-ORIGEM" if args.tag_origem else "ARQUIVO"
+    print("== injetar_vars_clint ==")
+    print(f"modo: {modo} | "
+          f"{'DRY-RUN (nao grava)' if args.dry_run else 'GRAVACAO REAL'} | "
+          f"workers: {args.workers}")
+
+    c = ClintClient.from_master_env()
+
+    totais = {"atualizado": 0, "criado": 0, "dry": 0, "pulado": 0, "erro": 0}
+
+    if args.tag_origem:
+        jobs, tag_id, reread_tag_id = coletar_por_tag(c, args, flags, totais)
+    else:
+        jobs, tag_id, reread_tag_id = coletar_por_arquivo(c, args, flags, totais)
+
+    if not args.dry_run:
+        gravar_e_verificar(c, jobs, args, tag_id, totais, reread_tag_id)
+
+    print("-" * 72)
+    resumo = (
+        f"RESUMO: atualizados={totais['atualizado']} | "
+        f"criados={totais['criado']} | dry-run={totais['dry']} | "
+        f"pulados={totais['pulado']} | erros={totais['erro']}"
+    )
+    if "verificados_total" in totais:
+        resumo += (f" | verificados={totais['verificados_ok']}/"
+                   f"{totais['verificados_total']}")
+    print(resumo)
+    return totais
+
+
+# ----------------------------------------------------------------------------
+# CLI
+# ----------------------------------------------------------------------------
+
+def build_parser():
+    ap = argparse.ArgumentParser(
+        prog="injetar_vars_clint.py",
+        description="Injeta variaveis de template (v1..v5) em contatos do Clint "
+                    "via API, pra disparo em massa de WhatsApp. Aceita arquivo "
+                    "OU --tag-origem, grava em paralelo e verifica no fim.",
+        epilog="Exemplos:\n"
+               "  # modo ARQUIVO, disparo em massa (copies fixas), so simulando:\n"
+               "  python injetar_vars_clint.py lista.csv --tag Disparo_X "
+               "--v1 'Ola' --v4 'Aperte o botao' --dry-run\n"
+               "  # modo ARQUIVO, copies por linha da planilha, gravando:\n"
+               "  python injetar_vars_clint.py lista.xlsx --tag Disparo_X\n"
+               "  # modo TAG-ORIGEM: pega TODOS os contatos da tag e injeta copies:\n"
+               "  python injetar_vars_clint.py --tag-origem Evento_AoVivo "
+               "--v1 'Comecou!' --v4 'Entrar agora' --workers 8\n",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    ap.add_argument("entrada", nargs="?",
+                    help="(modo ARQUIVO) CSV/xlsx com coluna de telefone e/ou ID "
+                         "do Clint. Omita se usar --tag-origem.")
+    ap.add_argument("--tag-origem", dest="tag_origem",
+                    help="(modo TAG) busca os contatos DIRETO por esta tag "
+                         "(em vez de ler arquivo). Para se a tag sumir ou vier 0. "
+                         "Allowlist client-side confirma que cada contato tem a tag.")
+    ap.add_argument("--tag", help="nome da tag a APLICAR em cada contato (deve existir)")
+    ap.add_argument("--criar-tag", dest="criar_tag", action="store_true",
+                    help="se a --tag nao existir, cria (default: segue sem tag)")
+    for i in range(1, 6):
+        ap.add_argument(f"--v{i}", default="",
+                        help=f"copy FIXA do campo v{i} (aplica a todos, sobrepoe a planilha)")
+    ap.add_argument("--workers", type=int, default=DEFAULT_WORKERS,
+                    help=f"threads paralelas pras gravacoes (default {DEFAULT_WORKERS})")
+    ap.add_argument("--criar", action="store_true",
+                    help="(modo arquivo) cria o contato se o telefone nao existir "
+                         "(nao validado; escreve FORA do alvo; cuidado)")
+    ap.add_argument("--origin", help="origin_id do Clint pra criar via deal (com --criar)")
+    ap.add_argument("--dry-run", dest="dry_run", action="store_true",
+                    help="so mostra o que faria, nao grava nada")
+    ap.add_argument("--limit", type=int, help="processa so os primeiros N contatos/linhas")
+    ap.add_argument("--fone", help="(modo arquivo) forca o nome da coluna de telefone")
+    ap.add_argument("--id-col", dest="id_col", help="(modo arquivo) forca o nome da coluna de ID do Clint")
+    ap.add_argument("--nome-col", dest="nome_col", help="(modo arquivo) forca o nome da coluna de nome")
+    ap.add_argument("--country", default="55", help="codigo do pais (default 55)")
+    return ap
+
+
+def main():
+    args = build_parser().parse_args()
+    processar(args)
+
+
+if __name__ == "__main__":
+    main()
+
